@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ColorCode;
 using UnityEngine;
 using HtmlAgilityPack;
-using Highlight;
-using Highlight.Engines;
+using UnityEditor.ShaderGraph;
 
 namespace CodeAnimator
 {
@@ -21,14 +21,61 @@ namespace CodeAnimator
 		private List<Span> LineSpans;
 		private List<Span> ColumnSpans;
 		private Dictionary<string, Span> classSpans = new Dictionary<string, Span>();
+		private Dictionary<string, Dictionary<string, Span>> styles = new Dictionary<string, Dictionary<string, Span>>();
 		private Dictionary<string, Span> idSpans = new Dictionary<string, Span>();
-		
+		public bool highlightAsLanguage;
 		public string HighlightLangugage;
+		//oublic bool html
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
 		public void Start()
 		{
 			RenderText();
+		}
+
+		[ContextMenu("Render Text")]
+		private void RenderText()
+		{
+			//preprocess and reset
+			_processedText = PreProcessText(inputText);
+			Clear();
+
+			//Walk! this popualtes contexts and spans, and callback creates children.
+			var walk = RenderAsHTML(_processedText);
+
+
+			if (styles.TryGetValue("color", out var colors))
+			{
+				foreach (var kvp in colors)
+				{
+					var colorName = kvp.Key.Trim().ToLower();
+					if (ColorUtility.TryParseHtmlString(colorName, out var color))
+					{
+						SetColor(kvp.Value, color);
+					}else if (colorName.StartsWith("rgb"))
+					{
+						//rgb(r,g,b)
+						var clean = colorName.Replace("rgb", string.Empty).Replace("(", string.Empty)
+							.Replace(")", string.Empty);
+						var vals =  clean.Split(',');
+						if (vals.Length == 3)
+						{
+							var r = int.Parse(vals[0]) / 255f;
+							var g = int.Parse(vals[1]) / 255f;
+							var b = int.Parse(vals[2]) / 255f;
+							Color c = new Color(r, g, b);
+							SetColor(kvp.Value, c);
+						}
+						else
+						{
+							Debug.Log($"Huh? rgb {vals.Length} from {colorName}");
+						}
+					}
+				}
+			}
+
+			//complete.
+			Debug.Log("done:\n" + walk.Text);
 		}
 
 		private string PreProcessText(string input)
@@ -41,10 +88,12 @@ namespace CodeAnimator
 
 			var text = input.Replace("/t", spaces);
 
-			if (!String.IsNullOrEmpty(HighlightLangugage))
+			if (highlightAsLanguage)
 			{
-				var highlighter = new Highlighter(new HtmlEngine(){UseCss = true});//useCss enables inline styles, which we will parse into spans.
-				var highlightedCode = highlighter.Highlight(HighlightLangugage, inputText);
+				//var language = ColorCode.Languages.FindById("java");
+				//todo: language selection by name or enum
+				var formatter = new HtmlFormatter();
+				var highlightedCode = formatter.GetHtmlString(text, Languages.CSharp);
 				return highlightedCode;
 			}
 
@@ -57,6 +106,7 @@ namespace CodeAnimator
 			html.LoadHtml(source);
 
 			var context = new WalkContext();
+			context.SpacesForTabs = Font.gapsPerTab;
 			context.AddCharacterCallback = AddCharacter;
 			WalkHTMLNode(html.DocumentNode, ref context);
 			return context;
@@ -91,6 +141,52 @@ namespace CodeAnimator
 					var s = context.PushSpan();
 					classSpans.Add(cl, s);
 					scount++;
+				}
+
+				var style = node.GetAttributeValue("Style", null);
+				if (!string.IsNullOrEmpty(style))
+				{
+					var styleElements = style.Split(';');
+					foreach (var styleElement in styleElements)
+					{
+						if (string.IsNullOrEmpty(styleElement))
+						{
+							continue;
+						}
+						var kvp = styleElement.Split(':');
+						if (kvp.Length != 2){
+							Debug.LogWarning($"{node.Name}: style invalid: {style}");
+							continue;
+						}
+						var key = kvp[0];
+						var styleValue = kvp[1];
+						if (!styles.ContainsKey(key))
+						{
+							styles.Add(key, new Dictionary<string, Span>());
+						}
+						if (styles.TryGetValue(key, out var styleKeyDict))
+						{
+							if (styleKeyDict.TryGetValue(styleValue, out Span styleValueSpan))
+							{
+								//uhg trying not to do this sort of "reaching in", but testing bugs.
+								if (!context.Spans.Contains(styleValueSpan))
+								{
+									context.PushSpan(styleValueSpan);
+									scount++;
+								}
+							}
+							else
+							{
+								styleKeyDict.Add(styleValue, context.PushSpan());
+								scount++;
+							}
+						}
+						else
+						{
+							Debug.LogError("uh oh");
+						}
+						
+					}
 				}
 
 				if (!string.IsNullOrEmpty(node.Id))
@@ -132,34 +228,44 @@ namespace CodeAnimator
 			}
 		}
 
-		private void RenderText()
+		public void AddCharacter(char c, WalkContext context)
 		{
-			//preprocess and reset
-			_processedText = PreProcessText(inputText);
-			Clear();
+			var atom = new Atom(c, TextStyle.Normal);
+			var argo = new GameObject();
+			argo.transform.SetParent(transform);
+			argo.name = c.ToString();
+			var ar = argo.AddComponent<AtomRenderer>();
+			ar.Init(atom, context.X, context.Y, this);
 
-			//Walk! this popualtes contexts and spans, and callback creates children.
-			var walk = RenderAsHTML(_processedText);
-
-			//colorize
-			var classStyles = new[] { 
-				("CsharpStatement", Color.green),
-				("CsharpOperator",Color.cyan),
-				("CsharpValueType", Color.yellow),
-			};
-			Debug.Log("Classes Found: "+classSpans.Count);
-			foreach (var style in classStyles)
+			while (LineSpans.Count <= context.Y)
 			{
-				if (classSpans.TryGetValue(style.Item1, out var span))
-				{
-					SetColor(span, style.Item2);
-				}
+				LineSpans.Add(new Span());
 			}
-			
-			//complete.
-			Debug.Log(walk.Text);
+
+			while (ColumnSpans.Count <= context.X)
+			{
+				ColumnSpans.Add(new Span());
+			}
+
+			LineSpans[context.Y].AddAtom(ar);
+			ColumnSpans[context.X].AddAtom(ar);
+
+			foreach (var span in context.Spans)
+			{
+				span.AddAtom(ar);
+			}
+
+			if (!startingPosRenderers.ContainsKey(new Vector2Int(context.X, context.Y)))
+			{
+				startingPosRenderers.Add(new Vector2Int(context.X, context.Y), ar);
+			}
+			else
+			{
+				Debug.LogWarning($"Key {context.X}:{context.Y} is already in the list.");
+			}
 		}
 
+		
 		public Span GetSpanForRange(int startRow, int startColumn, int endRow, int endColumn)
 		{
 			var s = new Span();
@@ -192,45 +298,13 @@ namespace CodeAnimator
 			
 			LineSpans  = new List<Span>();
 			ColumnSpans = new List<Span>();
+			styles.Clear();
+			idSpans.Clear();
+			classSpans.Clear();
 			startingPosRenderers.Clear();
+			
 		}
 
-		public void AddCharacter(char c, WalkContext context)
-		{
-			var atom = new Atom(c, TextStyle.Normal);
-			var argo = new GameObject();
-			argo.transform.SetParent(transform);
-			argo.name = c.ToString();
-			var ar = argo.AddComponent<AtomRenderer>();
-			ar.Init(atom, context.X, context.Y, this);
-
-			while (LineSpans.Count <= context.Y)
-			{
-				LineSpans.Add(new Span());
-			}
-
-			while (ColumnSpans.Count <= context.X)
-			{
-				ColumnSpans.Add(new Span());
-			}
-			
-			LineSpans[context.Y].AddAtom(ar);
-			ColumnSpans[context.X].AddAtom(ar);
-
-			foreach (var span in context.Spans)
-			{
-				span.AddAtom(ar);
-			}
-			
-			if (!startingPosRenderers.ContainsKey(new Vector2Int(context.X, context.Y)))
-			{
-				startingPosRenderers.Add(new Vector2Int(context.X, context.Y), ar);
-			}
-			else
-			{
-				Debug.LogWarning($"Key {context.X}:{context.Y} is already in the list.");
-			}
-		}
 
 		public void SetColor(Span span, Color color)
 		{
@@ -250,6 +324,8 @@ namespace CodeAnimator
 		private List<AtomRenderer> _atoms = new List<AtomRenderer>();
 		public Action<char, WalkContext> AddCharacterCallback { get; set; }
 		public string Text => _builder.ToString();
+		public int SpacesForTabs = 2;
+
 		public void LineBreak()
 		{
 			this.X = 0;
@@ -259,6 +335,12 @@ namespace CodeAnimator
 		public Span PushSpan()
 		{
 			Span span = new Span();
+			Spans.Push(span);
+			return span;
+		}
+
+		public Span PushSpan(Span span)
+		{
 			Spans.Push(span);
 			return span;
 		}
@@ -276,8 +358,7 @@ namespace CodeAnimator
 			
 			if (character == '\t')
 			{
-				Debug.LogWarning("Tab found in walkContext, tabs should be replaced with spaces before walking html.");
-				this.X += 2;
+				this.X += this.SpacesForTabs;
 				return;
 			}
 

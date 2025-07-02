@@ -200,7 +200,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BackGroundColor: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -370,7 +370,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   font: {fileID: 11400000, guid: 41fed179c11c1304d98a78f3fcf83136, type: 2}
-  inputText: "for(int i = 0;i<10;i++){\n\tDebug.Log(i);\n}"
+  inputText: "<pre style=\"font-family:monospace;color: rgb(68, 68, 68); background-color:
+    rgb(243, 243, 243); font-weight: 400; \"><span style=\"color: rgb(68, 68, 68);
+    font-weight: 700;\">namespace</span> <span style=\"color: rgb(136, 0, 0); font-weight:
+    700;\">CodeAnimator</span>\r\n{\r\n\t[<span style=\"color: rgb(31, 113, 153);
+    font-weight: 400;\">System.Serializable</span>]\r\n\t<span style=\"color: rgb(68,
+    68, 68); font-weight: 700;\">public</span> <span style=\"color: rgb(68, 68, 68);
+    font-weight: 700;\">struct</span> Atom\r\n\t{\r\n\t\t<span style=\"color: rgb(68,
+    68, 68); font-weight: 700;\">public</span> <span style=\"color: rgb(57, 115,
+    0); font-weight: 400;\">char</span> Character;\r\n\t\t<span style=\"color: rgb(68,
+    68, 68); font-weight: 700;\">public</span> TextStyle CharacterStyle;\r\n\r\n\t\t<span
+    style=\"color: rgb(68, 68, 68); font-weight: 400;\"><span style=\"color: rgb(68,
+    68, 68); font-weight: 700;\">public</span> <span style=\"color: rgb(136, 0, 0);
+    font-weight: 700;\">Atom</span>(<span style=\"color: rgb(68, 68, 68); font-weight:
+    400;\"><span style=\"color: rgb(57, 115, 0); font-weight: 400;\">char</span>
+    character, TextStyle normal</span>)</span>\r\n\t\t{\r\n\t\t\tCharacter  = character;\r\n\t\t\tCharacterStyle
+    = normal;\r\n\t\t}\r\n\t}\r\n\r\n\t<span style=\"color: rgb(68, 68, 68); font-weight:
+    700;\">public</span> <span style=\"color: rgb(57, 115, 0); font-weight: 400;\">enum</span>
+    TextStyle\r\n\t{\r\n\t\tNormal,\r\n\t\tItalic,\r\n\t\tBold,\r\n\t}\r\n}</pre>"
+  highlightAsLanguage: 0
   HighlightLangugage: C#
 --- !u!4 &2066319233
 Transform:
