@@ -136,9 +136,17 @@ namespace CodeAnimator
 				int scount = 0;
 				foreach (var cl in node.GetClasses())
 				{
-					var s = context.PushSpan();
-					classSpans.Add(cl, s);
-					scount++;
+					if (classSpans.TryGetValue(cl, out var span))
+					{
+						context.PushSpan(span);
+						scount++;
+					}
+					else
+					{
+						var s = context.PushSpan();
+						classSpans.Add(cl, s);
+						scount++;
+					}
 				}
 
 				var style = node.GetAttributeValue("Style", null);
