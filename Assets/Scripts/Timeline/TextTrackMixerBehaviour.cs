@@ -45,12 +45,12 @@ namespace CodeAnimator
             }
 
             // blend to the default values
-            var color = Color.Lerp(Color.clear, blendedColor, totalWeight);
+            var color = Color.Lerp(Color.black, blendedColor, totalWeight);
            
            var span = trackBinding.GetSpan(Selector);
            if (span != null)
            {
-               trackBinding.SetColor(span, color);
+               trackBinding.SetColor(span, color, totalWeight);
            }
         }
 

@@ -11,6 +11,8 @@ public class AtomRenderer : MonoBehaviour
     private TextRenderer textRenderer;
     private SpriteRenderer _spriteRenderer;
 
+    private Color DefaultColor;
+    private float PercentDefault = 1;
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -41,10 +43,27 @@ public class AtomRenderer : MonoBehaviour
         transform.localPosition = new Vector3(c*textRenderer.Font.aspect, -r, 0);
     }
 
-    public void SetColor(Color color)
+    public void SetDefaultColorPercentage(float f)
+    {
+        PercentDefault = f;
+    }
+    public void SetColor(Color color, bool setDefault = false)
     {
         if (_spriteRenderer != null)
         {
+            if (setDefault)
+            {
+                DefaultColor = color;
+            }
+            else
+            {
+                if (color.a < 1f)
+                {
+                    var c = Color.Lerp(DefaultColor, color, color.a);
+                    _spriteRenderer.color = c;
+                    return;
+                }
+            }
             _spriteRenderer.color = color;
         }
         else

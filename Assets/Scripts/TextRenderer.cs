@@ -55,7 +55,7 @@ namespace CodeAnimator
 					var colorName = kvp.Key.Trim().ToLower();
 					if (ColorUtility.TryParseHtmlString(colorName, out var color))
 					{
-						SetColor(kvp.Value, color);
+						SetDefaultColor(kvp.Value, color);
 					}else if (colorName.StartsWith("rgb"))
 					{
 						//rgb(r,g,b)
@@ -68,7 +68,7 @@ namespace CodeAnimator
 							var g = int.Parse(vals[1]) / 255f;
 							var b = int.Parse(vals[2]) / 255f;
 							Color c = new Color(r, g, b);
-							SetColor(kvp.Value, c);
+							SetDefaultColor(kvp.Value, c);
 						}
 						else
 						{
@@ -317,15 +317,23 @@ namespace CodeAnimator
 			classSpans.Clear();
 			renderers.Clear();
 			startingPosRenderers.Clear();
-			
 		}
 
 
-		public void SetColor(Span span, Color color)
+		public void SetDefaultColor(Span span, Color color)
 		{
 			foreach (var atom in span.Atoms)
 			{
-				atom.SetColor(color);
+				atom.SetDefaultColorPercentage(1);
+				atom.SetColor(color, true);
+			}
+		}
+		public void SetColor(Span span, Color color, float defaultPercentage)
+		{
+			foreach (var atom in span.Atoms)
+			{
+				atom.SetDefaultColorPercentage(defaultPercentage);
+				atom.SetColor(color, false);
 			}
 		}
 
