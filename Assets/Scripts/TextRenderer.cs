@@ -5,6 +5,7 @@ using System.Text;
 using ColorCode;
 using UnityEngine;
 using HtmlAgilityPack;
+using UnityEditor;
 using UnityEditor.ShaderGraph;
 
 namespace CodeAnimator
@@ -72,10 +73,7 @@ namespace CodeAnimator
 						}
 					}
 				}
-			}
-
-			//complete.
-			Debug.Log("done:\n" + walk.Text);
+			} 
 		}
 
 		private string PreProcessText(string input)
@@ -146,7 +144,8 @@ namespace CodeAnimator
 				var style = node.GetAttributeValue("Style", null);
 				if (!string.IsNullOrEmpty(style))
 				{
-					var styleElements = style.Split(';');
+					var styleElements = style.Split(';').Select(x=>x.Trim());
+					
 					foreach (var styleElement in styleElements)
 					{
 						if (string.IsNullOrEmpty(styleElement))
@@ -158,8 +157,8 @@ namespace CodeAnimator
 							Debug.LogWarning($"{node.Name}: style invalid: {style}");
 							continue;
 						}
-						var key = kvp[0];
-						var styleValue = kvp[1];
+						var key = kvp[0].Trim();
+						var styleValue = kvp[1].Trim();
 						if (!styles.ContainsKey(key))
 						{
 							styles.Add(key, new Dictionary<string, Span>());
