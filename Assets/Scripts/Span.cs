@@ -10,5 +10,18 @@ namespace CodeAnimator
 		{
 			atoms.Add(atom);
 		}
+
+		public void AddSpan(Span span)
+		{
+			if (span == null || span.Atoms == null)
+			{
+				return;
+			}
+
+			foreach (var atom in span.Atoms)
+			{
+				atoms.Add(atom);
+			}
+		}
 	}
 }

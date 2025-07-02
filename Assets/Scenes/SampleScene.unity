@@ -340,6 +340,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1126912052
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1126912054}
+  - component: {fileID: 1126912053}
+  m_Layer: 0
+  m_Name: Director
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!320 &1126912053
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126912052}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: fc6e6031e4393b945b2200dba34ad02b, type: 2}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings:
+  - key: {fileID: 8724159151558285568, guid: fc6e6031e4393b945b2200dba34ad02b, type: 2}
+    value: {fileID: 2066319232}
+  m_ExposedReferences:
+    m_References:
+    - be3b29ce370b20748a462acb9e6beb94: {fileID: 2066319232}
+--- !u!4 &1126912054
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126912052}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2066319231
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,25 +422,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   font: {fileID: 11400000, guid: 41fed179c11c1304d98a78f3fcf83136, type: 2}
-  inputText: "<pre style=\"font-family:monospace;color: rgb(68, 68, 68); background-color:
-    rgb(243, 243, 243); font-weight: 400; \"><span style=\"color: rgb(68, 68, 68);
-    font-weight: 700;\">namespace</span> <span style=\"color: rgb(136, 0, 0); font-weight:
-    700;\">CodeAnimator</span>\r\n{\r\n\t[<span style=\"color: rgb(31, 113, 153);
-    font-weight: 400;\">System.Serializable</span>]\r\n\t<span style=\"color: rgb(68,
-    68, 68); font-weight: 700;\">public</span> <span style=\"color: rgb(68, 68, 68);
-    font-weight: 700;\">struct</span> Atom\r\n\t{\r\n\t\t<span style=\"color: rgb(68,
-    68, 68); font-weight: 700;\">public</span> <span style=\"color: rgb(57, 115,
-    0); font-weight: 400;\">char</span> Character;\r\n\t\t<span style=\"color: rgb(68,
-    68, 68); font-weight: 700;\">public</span> TextStyle CharacterStyle;\r\n\r\n\t\t<span
-    style=\"color: rgb(68, 68, 68); font-weight: 400;\"><span style=\"color: rgb(68,
-    68, 68); font-weight: 700;\">public</span> <span style=\"color: rgb(136, 0, 0);
-    font-weight: 700;\">Atom</span>(<span style=\"color: rgb(68, 68, 68); font-weight:
-    400;\"><span style=\"color: rgb(57, 115, 0); font-weight: 400;\">char</span>
-    character, TextStyle normal</span>)</span>\r\n\t\t{\r\n\t\t\tCharacter  = character;\r\n\t\t\tCharacterStyle
-    = normal;\r\n\t\t}\r\n\t}\r\n\r\n\t<span style=\"color: rgb(68, 68, 68); font-weight:
-    700;\">public</span> <span style=\"color: rgb(57, 115, 0); font-weight: 400;\">enum</span>
-    TextStyle\r\n\t{\r\n\t\tNormal,\r\n\t\tItalic,\r\n\t\tBold,\r\n\t}\r\n}</pre>"
-  highlightAsLanguage: 0
+  inputText: "for (int i = 0; i < inputCount; i++)\n{\n\t//some code\n}"
+  highlightAsLanguage: 1
   HighlightLangugage: C#
 --- !u!4 &2066319233
 Transform:
@@ -412,3 +447,4 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 2066319233}
+  - {fileID: 1126912054}

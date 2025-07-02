@@ -6,6 +6,7 @@ using Font = CodeAnimator.Font;
 [RequireComponent(typeof(SpriteRenderer))]
 public class AtomRenderer : MonoBehaviour
 {
+    public Atom Atom => atom;
     private Atom atom;
     private TextRenderer textRenderer;
     private SpriteRenderer _spriteRenderer;

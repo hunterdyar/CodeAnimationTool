@@ -5,8 +5,7 @@ using System.Text;
 using ColorCode;
 using UnityEngine;
 using HtmlAgilityPack;
-using UnityEditor;
-using UnityEditor.ShaderGraph;
+using UnityEngine.Rendering;
 
 namespace CodeAnimator
 {
@@ -18,6 +17,7 @@ namespace CodeAnimator
 		[TextArea,SerializeField] private string inputText;
 		private string _processedText;
 		private Dictionary<Vector2Int, AtomRenderer> startingPosRenderers = new Dictionary<Vector2Int, AtomRenderer>();
+		private List<AtomRenderer> renderers = new List<AtomRenderer>();
 		private int[] LineLengths;
 		private List<Span> LineSpans;
 		private List<Span> ColumnSpans;
@@ -26,12 +26,15 @@ namespace CodeAnimator
 		private Dictionary<string, Span> idSpans = new Dictionary<string, Span>();
 		public bool highlightAsLanguage;
 		public string HighlightLangugage;
+
+		private Dictionary<SpanSelector, Span> GetSpanCache = new Dictionary<SpanSelector, Span>();
 		//oublic bool html
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
 		public void Start()
 		{
 			RenderText();
+			GetSpanCache.Clear();
 		}
 
 		[ContextMenu("Render Text")]
@@ -261,7 +264,11 @@ namespace CodeAnimator
 			{
 				span.AddAtom(ar);
 			}
-
+			
+			//ordered list
+			renderers.Add(ar);
+			
+			//xy indexed list
 			if (!startingPosRenderers.ContainsKey(new Vector2Int(context.X, context.Y)))
 			{
 				startingPosRenderers.Add(new Vector2Int(context.X, context.Y), ar);
@@ -308,6 +315,7 @@ namespace CodeAnimator
 			styles.Clear();
 			idSpans.Clear();
 			classSpans.Clear();
+			renderers.Clear();
 			startingPosRenderers.Clear();
 			
 		}
@@ -319,6 +327,59 @@ namespace CodeAnimator
 			{
 				atom.SetColor(color);
 			}
+		}
+
+		public Span GetSpan(SpanSelector selector)
+		{
+			if (GetSpanCache.TryGetValue(selector, out var cachedSpan))
+			{
+				return cachedSpan;
+			}
+			string search = selector.Sensitive == CaseSensitive.CaseSensitive ? selector.searchText : selector.searchText.ToLower();
+			Span result = null;
+			switch (selector.searchType)
+			{
+				case TextSearchType.HTMLId:
+				{
+					if (!idSpans.TryGetValue(search, out result))
+					{
+						Debug.LogWarning($"ID {search} not found.");
+						return null;
+					}
+					break;
+				}	
+				case TextSearchType.HTMLClass:
+				{
+					if (!classSpans.TryGetValue(search, out result))
+					{
+						Debug.LogWarning($"Class {selector.searchText} not found.");
+						return null;
+					}
+					break;
+				}
+				case TextSearchType.FirstTextMatch:
+					result = TextUtility.GetFirstSubSequence(renderers, search.ToCharArray());
+					break;
+				case TextSearchType.LastTextMatch:
+					result = TextUtility.GetLastSubSequence(renderers, search.ToCharArray());
+					break;
+				case TextSearchType.AllTextMatches:
+					var allSpans = TextUtility.GetAllSubSequence(renderers, search.ToCharArray());
+					Span resultSpan = new Span();
+					foreach (var span in allSpans)
+					{
+						resultSpan.AddSpan(span);
+					}
+
+					result = resultSpan;
+					break;
+				default:
+					Debug.LogError("Bad selector!");
+					return null;
+			}
+			
+			GetSpanCache.Add(selector,result);
+			return result;
 		}
 	}
 
