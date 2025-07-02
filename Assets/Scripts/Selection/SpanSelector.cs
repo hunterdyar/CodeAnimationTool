@@ -20,6 +20,6 @@
 	public enum CaseSensitive
 	{
 		CaseSensitive,
-		NotInsensitive
+		NotSensitive
 	}
 }

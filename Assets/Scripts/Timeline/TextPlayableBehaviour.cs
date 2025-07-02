@@ -12,5 +12,10 @@ namespace CodeAnimator
     {
         [Tooltip("The color of the text")]
         public Color color = Color.white;
+
+        public string DisplayName()
+        {
+            return "Set Color";
+        }
     }
 }

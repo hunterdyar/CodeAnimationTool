@@ -16,16 +16,6 @@ namespace CodeAnimator
 			return HttpUtility.HtmlDecode(textNodeInnerText);
 		}
 
-		public static List<T> ListContains<T>(List<T> source, List<T> search)
-		{
-			if (search.Count > source.Count)
-				return new List<T>();
-
-			return Enumerable.Range(0, source.Count - search.Count + 1)
-				.Select(a => source.Skip(a).Take(search.Count))
-				.First(a => a.SequenceEqual(search)).ToList();
-		}
-
 		public static Span GetFirstSubSequence(List<AtomRenderer> source, char[] search)
 		{
 			Span s = new Span();
@@ -92,9 +82,10 @@ namespace CodeAnimator
 					{
 						s.AddAtom(x);
 					}
+					results.Add(s);
 				}
 			}
-
+			
 			return results;
 		}
 	}

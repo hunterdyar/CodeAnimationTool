@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ColorCode;
 using UnityEngine;
 using HtmlAgilityPack;
@@ -27,14 +25,14 @@ namespace CodeAnimator
 		public bool highlightAsLanguage;
 		public string HighlightLangugage;
 
-		private Dictionary<SpanSelector, Span> GetSpanCache = new Dictionary<SpanSelector, Span>();
+		private Dictionary<SpanSelector, Span> SpanCache = new Dictionary<SpanSelector, Span>();
 		//oublic bool html
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
 		public void Start()
 		{
 			RenderText();
-			GetSpanCache.Clear();
+			SpanCache.Clear();
 		}
 
 		[ContextMenu("Render Text")]
@@ -78,7 +76,6 @@ namespace CodeAnimator
 				}
 			} 
 		}
-
 		private string PreProcessText(string input)
 		{
 			string spaces = "";
@@ -100,7 +97,6 @@ namespace CodeAnimator
 
 			return text;
 		}
-
 		private WalkContext RenderAsHTML(string source)
 		{
 			var html = new HtmlDocument();
@@ -278,7 +274,6 @@ namespace CodeAnimator
 				Debug.LogWarning($"Key {context.X}:{context.Y} is already in the list.");
 			}
 		}
-
 		
 		public Span GetSpanForRange(int startRow, int startColumn, int endRow, int endColumn)
 		{
@@ -302,7 +297,6 @@ namespace CodeAnimator
 			return s;
 		}
 		
-
 		private void Clear()
 		{
 			foreach (var atom in startingPosRenderers.Values)
@@ -316,6 +310,7 @@ namespace CodeAnimator
 			idSpans.Clear();
 			classSpans.Clear();
 			renderers.Clear();
+			SpanCache.Clear();
 			startingPosRenderers.Clear();
 		}
 
@@ -339,7 +334,7 @@ namespace CodeAnimator
 
 		public Span GetSpan(SpanSelector selector)
 		{
-			if (GetSpanCache.TryGetValue(selector, out var cachedSpan))
+			if (SpanCache.TryGetValue(selector, out var cachedSpan))
 			{
 				return cachedSpan;
 			}
@@ -386,82 +381,8 @@ namespace CodeAnimator
 					return null;
 			}
 			
-			GetSpanCache.Add(selector,result);
+			SpanCache.Add(selector,result);
 			return result;
-		}
-	}
-
-	public class WalkContext
-	{
-		public int X = 0;
-		public int Y = 0;
-		public Stack<Span> Spans = new Stack<Span>();
-		private StringBuilder _builder = new StringBuilder();
-		private List<AtomRenderer> _atoms = new List<AtomRenderer>();
-		public Action<char, WalkContext> AddCharacterCallback { get; set; }
-		public string Text => _builder.ToString();
-		public int SpacesForTabs = 2;
-
-		public void LineBreak()
-		{
-			this.X = 0;
-			this.Y++;
-		}
-
-		public Span PushSpan()
-		{
-			Span span = new Span();
-			Spans.Push(span);
-			return span;
-		}
-
-		public Span PushSpan(Span span)
-		{
-			Spans.Push(span);
-			return span;
-		}
-
-		public Span PopSpan()
-		{
-			return Spans.Pop();
-		}
-		public void AddCharacter(char character)
-		{
-			if (TextUtility.NoRender(character))
-			{
-				return;
-			}
-			
-			if (character == '\t')
-			{
-				this.X += this.SpacesForTabs;
-				return;
-			}
-
-			if (character == ' ')
-			{
-				this.X += 1;
-				return;
-			}
-
-			if (character == '\n')
-			{
-				this.LineBreak();
-				return;
-			}
-			
-			this.AddCharacterCallback?.Invoke(character, this);
-			_builder.Append(character);
-			this.X++;
-		}
-
-
-		public void PopSpans(int scount)
-		{
-			for (int i = 0; i < scount; i++)
-			{
-				Spans.Pop();
-			}
 		}
 	}
 }

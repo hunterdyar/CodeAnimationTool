@@ -77,10 +77,10 @@ MonoBehaviour:
     m_Duration: 1.9833333333333334
     m_TimeScale: 1
     m_ParentTrack: {fileID: 8724159151558285568}
-    m_EaseInDuration: 0.99
+    m_EaseInDuration: 0.35
     m_EaseOutDuration: 0
     m_BlendInDuration: -1
-    m_BlendOutDuration: 0.7
+    m_BlendOutDuration: 0.41666666666666674
     m_MixInCurve:
       serializedVersion: 2
       m_Curve:
@@ -138,17 +138,17 @@ MonoBehaviour:
     m_PreExtrapolationMode: 0
     m_PostExtrapolationTime: 0
     m_PreExtrapolationTime: 0
-    m_DisplayName: TextPlayableAsset
+    m_DisplayName: Set Color
   - m_Version: 1
-    m_Start: 1.2833333333333334
+    m_Start: 1.5666666666666667
     m_ClipIn: 0
     m_Asset: {fileID: -5639876097128112699}
-    m_Duration: 2.5166666666666666
+    m_Duration: 1.4833333333333334
     m_TimeScale: 1
     m_ParentTrack: {fileID: 8724159151558285568}
     m_EaseInDuration: 0
     m_EaseOutDuration: 0
-    m_BlendInDuration: 0.7
+    m_BlendInDuration: 0.41666666666666674
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
@@ -189,10 +189,10 @@ MonoBehaviour:
     m_PreExtrapolationMode: 0
     m_PostExtrapolationTime: 0
     m_PreExtrapolationTime: 0
-    m_DisplayName: TextPlayableAsset
+    m_DisplayName: Set Color
   m_Markers:
     m_Objects: []
   TrackSelector:
-    searchText: for
-    searchType: 0
-    Sensitive: 0
+    searchText: i
+    searchType: 1
+    Sensitive: 1

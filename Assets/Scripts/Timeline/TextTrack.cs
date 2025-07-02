@@ -12,7 +12,6 @@ namespace CodeAnimator
     //  * How to change data over time on Components that is not supported by Animation.
     //  * Putting properties into preview mode.
     //  * Reacting to changes on the clip from the Timeline Editor.
-    // Note: This track requires the TextMeshPro package to be installed in the project.
     [TrackColor(0.1394896f, 0.4411765f, 0.3413077f)]
     [TrackClipType(typeof(TextPlayableAsset))]
     [TrackBindingType(typeof(TextRenderer))]
@@ -28,21 +27,21 @@ namespace CodeAnimator
             return mixer;
         }
 
-        // Invoked by the timeline editor to put properties into preview mode. This permits the timeline
-        // to temporarily change fields for the purpose of previewing in EditMode.
-        public override void GatherProperties(PlayableDirector director, IPropertyCollector driver)
-        {
-            TMP_Text trackBinding = director.GetGenericBinding(this) as TMP_Text;
-            if (trackBinding == null)
-                return;
-
-            // The field names are the name of the backing serializable field. These can be found from the class source,
-            // or from the unity scene file that contains an object of that type.
-            // driver.AddFromName<TextRenderer>(trackBinding.gameObject, "m_text");
-            // driver.AddFromName<TextRenderer>(trackBinding.gameObject, "m_fontSize");
-            // driver.AddFromName<TextRenderer>(trackBinding.gameObject, "m_fontColor");
-
-            base.GatherProperties(director, driver);
-        }
+        // // Invoked by the timeline editor to put properties into preview mode. This permits the timeline
+        // // to temporarily change fields for the purpose of previewing in EditMode.
+        // public override void GatherProperties(PlayableDirector director, IPropertyCollector driver)
+        // {
+        //     TMP_Text trackBinding = director.GetGenericBinding(this) as TMP_Text;
+        //     if (trackBinding == null)
+        //         return;
+        //
+        //     // The field names are the name of the backing serializable field. These can be found from the class source,
+        //     // or from the unity scene file that contains an object of that type.
+        //     // driver.AddFromName<TextRenderer>(trackBinding.gameObject, "m_text");
+        //     // driver.AddFromName<TextRenderer>(trackBinding.gameObject, "m_fontSize");
+        //     // driver.AddFromName<TextRenderer>(trackBinding.gameObject, "m_fontColor");
+        //
+        //     base.GatherProperties(director, driver);
+        // }
     }
 }
