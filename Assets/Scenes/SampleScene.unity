@@ -370,11 +370,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   font: {fileID: 11400000, guid: 41fed179c11c1304d98a78f3fcf83136, type: 2}
-  inputText: 'Hello, this is a line
-
-    of
-
-    text!'
+  inputText: "for(int i = 0;i<10;i++){\n\tDebug.Log(i);\n}"
+  HighlightLangugage: C#
 --- !u!4 &2066319233
 Transform:
   m_ObjectHideFlags: 0
@@ -384,7 +381,7 @@ Transform:
   m_GameObject: {fileID: 2066319231}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -5.54, y: 2.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
+using HtmlAgilityPack;
+using Highlight;
+using Highlight.Engines;
 
 namespace CodeAnimator
 {
@@ -14,83 +18,146 @@ namespace CodeAnimator
 		private string _processedText;
 		private Dictionary<Vector2Int, AtomRenderer> startingPosRenderers = new Dictionary<Vector2Int, AtomRenderer>();
 		private int[] LineLengths;
-		private Span[] LineSpans;
-		private Span[] ColumnSpans;
+		private List<Span> LineSpans;
+		private List<Span> ColumnSpans;
+		private Dictionary<string, Span> classSpans = new Dictionary<string, Span>();
+		private Dictionary<string, Span> idSpans = new Dictionary<string, Span>();
 		
+		public string HighlightLangugage;
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
 		public void Start()
 		{
 			RenderText();
-			
 		}
 
-		public void RenderText()
+		private string PreProcessText(string input)
 		{
-			Clear();
 			string spaces = "";
 			for (int i = 0; i < font.gapsPerTab; i++)
 			{
 				spaces += " ";
 			}
-			_processedText = inputText.Replace("\t", spaces);
-			var lines = _processedText.Split('\n');
-			int x = 0;
-			int y = 0;
-			LineSpans = new Span[lines.Length];
-			LineLengths = new int[lines.Length];
-			ColumnSpans = new Span[lines.Max(x=>x.Length)];
-			
-			for (int r = 0; r < lines.Length; r++)
+
+			var text = input.Replace("/t", spaces);
+
+			if (!String.IsNullOrEmpty(HighlightLangugage))
 			{
-				var line = lines[r];
-				LineLengths[r] = line.Length;
-				LineSpans[r]  = new Span();
-				for (int c = 0; c < line.Length; c++)
-				{
-					if (ColumnSpans[x] == null)
-					{
-						ColumnSpans[x] = new Span();
-					}
-					
-					var character = line[c];
-					
-					if (NoRender(character))
-					{
-						continue;
-					}
+				var highlighter = new Highlighter(new HtmlEngine(){UseCss = true});//useCss enables inline styles, which we will parse into spans.
+				var highlightedCode = highlighter.Highlight(HighlightLangugage, inputText);
+				return highlightedCode;
+			}
 
-					if (character == '\t')
-					{
-						x += Font.gapsPerTab;
-						continue;
-					}
+			return text;
+		}
 
-					if (character == ' ')
-					{
-						x += 1;
-						continue;
-					}
+		private WalkContext RenderAsHTML(string source)
+		{
+			var html = new HtmlDocument();
+			html.LoadHtml(source);
 
-					var atom = new Atom(character, TextStyle.Normal);
-					var argo = new GameObject();
-					argo.transform.SetParent(transform);
-					argo.name = character.ToString();
-					var ar=argo.AddComponent<AtomRenderer>();
-					ar.Init(atom, x, y, this);
-					startingPosRenderers.Add(new Vector2Int(x, y), ar);
-					
-					//register appropriate spans.
-					LineSpans[r].AddAtom(ar);
-					ColumnSpans[x].AddAtom(ar);
-					
-					x++;
-				}
+			var context = new WalkContext();
+			context.AddCharacterCallback = AddCharacter;
+			WalkHTMLNode(html.DocumentNode, ref context);
+			return context;
+		}
 
-				y++;
-				x = 0;
+		private void WalkHTMLNode(HtmlNodeCollection nodes, ref WalkContext context)
+		{
+			foreach (var node in nodes)
+			{
+				WalkHTMLNode(node, ref context);
+			}
+		}
+
+		private void WalkHTMLNode(HtmlNode node, ref WalkContext context)
+		{
+			if (node == null)
+			{
+				return;
 			}
 			
+			if (node.Name == "Br" || node.Name == "Break")
+			{
+				context.LineBreak();
+				return;
+			}
+
+			if (node.NodeType == HtmlNodeType.Element)
+			{
+				int scount = 0;
+				foreach (var cl in node.GetClasses())
+				{
+					var s = context.PushSpan();
+					classSpans.Add(cl, s);
+					scount++;
+				}
+
+				if (!string.IsNullOrEmpty(node.Id))
+				{
+					idSpans.Add(node.Id, context.PushSpan());
+					scount++;
+				}
+				
+				var children = node.ChildNodes;
+				WalkHTMLNode(children, ref context);
+				context.PopSpans(scount);
+			}
+			else if (node.NodeType == HtmlNodeType.Document)
+			{
+				var children = node.ChildNodes;
+				WalkHTMLNode(children, ref context);
+			}
+			else if (node.NodeType == HtmlNodeType.Comment)
+			{
+				
+			}
+			else if (node.NodeType == HtmlNodeType.Text)
+			{
+				if (node is HtmlTextNode textNode)
+				{
+					var text = TextUtility.HtmlDecode(textNode.InnerText);
+					
+					foreach (var c in text)
+					{
+						context.AddCharacter(c);
+					}
+
+					return;
+				}
+				else
+				{
+					Debug.LogWarning("HTML text node is not a text node?");	
+				}
+			}
+		}
+
+		private void RenderText()
+		{
+			//preprocess and reset
+			_processedText = PreProcessText(inputText);
+			Clear();
+
+			//Walk! this popualtes contexts and spans, and callback creates children.
+			var walk = RenderAsHTML(_processedText);
+
+			//colorize
+			var classStyles = new[] { 
+				("CsharpStatement", Color.green),
+				("CsharpOperator",Color.cyan),
+				("CsharpValueType", Color.yellow),
+			};
+			Debug.Log("Classes Found: "+classSpans.Count);
+			foreach (var style in classStyles)
+			{
+				if (classSpans.TryGetValue(style.Item1, out var span))
+				{
+					SetColor(span, style.Item2);
+				}
+			}
+			
+			//complete.
+			Debug.Log(walk.Text);
 		}
 
 		public Span GetSpanForRange(int startRow, int startColumn, int endRow, int endColumn)
@@ -114,10 +181,7 @@ namespace CodeAnimator
 
 			return s;
 		}
-		private bool NoRender(char character)
-		{
-			return character == '\r';
-		}
+		
 
 		private void Clear()
 		{
@@ -125,8 +189,47 @@ namespace CodeAnimator
 			{
 				Destroy(atom.gameObject);
 			}
-
+			
+			LineSpans  = new List<Span>();
+			ColumnSpans = new List<Span>();
 			startingPosRenderers.Clear();
+		}
+
+		public void AddCharacter(char c, WalkContext context)
+		{
+			var atom = new Atom(c, TextStyle.Normal);
+			var argo = new GameObject();
+			argo.transform.SetParent(transform);
+			argo.name = c.ToString();
+			var ar = argo.AddComponent<AtomRenderer>();
+			ar.Init(atom, context.X, context.Y, this);
+
+			while (LineSpans.Count <= context.Y)
+			{
+				LineSpans.Add(new Span());
+			}
+
+			while (ColumnSpans.Count <= context.X)
+			{
+				ColumnSpans.Add(new Span());
+			}
+			
+			LineSpans[context.Y].AddAtom(ar);
+			ColumnSpans[context.X].AddAtom(ar);
+
+			foreach (var span in context.Spans)
+			{
+				span.AddAtom(ar);
+			}
+			
+			if (!startingPosRenderers.ContainsKey(new Vector2Int(context.X, context.Y)))
+			{
+				startingPosRenderers.Add(new Vector2Int(context.X, context.Y), ar);
+			}
+			else
+			{
+				Debug.LogWarning($"Key {context.X}:{context.Y} is already in the list.");
+			}
 		}
 
 		public void SetColor(Span span, Color color)
@@ -134,6 +237,73 @@ namespace CodeAnimator
 			foreach (var atom in span.Atoms)
 			{
 				atom.SetColor(color);
+			}
+		}
+	}
+
+	public class WalkContext
+	{
+		public int X = 0;
+		public int Y = 0;
+		public Stack<Span> Spans = new Stack<Span>();
+		private StringBuilder _builder = new StringBuilder();
+		private List<AtomRenderer> _atoms = new List<AtomRenderer>();
+		public Action<char, WalkContext> AddCharacterCallback { get; set; }
+		public string Text => _builder.ToString();
+		public void LineBreak()
+		{
+			this.X = 0;
+			this.Y++;
+		}
+
+		public Span PushSpan()
+		{
+			Span span = new Span();
+			Spans.Push(span);
+			return span;
+		}
+
+		public Span PopSpan()
+		{
+			return Spans.Pop();
+		}
+		public void AddCharacter(char character)
+		{
+			if (TextUtility.NoRender(character))
+			{
+				return;
+			}
+			
+			if (character == '\t')
+			{
+				Debug.LogWarning("Tab found in walkContext, tabs should be replaced with spaces before walking html.");
+				this.X += 2;
+				return;
+			}
+
+			if (character == ' ')
+			{
+				this.X += 1;
+				return;
+			}
+
+			if (character == '\n')
+			{
+				this.LineBreak();
+				return;
+			}
+			
+			this.AddCharacterCallback?.Invoke(character, this);
+			_builder.Append(character);
+			this.X++;
+		}
+
+
+		public void PopSpans(int scount)
+		{
+			for (int i = 0; i < scount; i++)
+			{
+				Spans.Pop();
 			}
 		}
 	}
