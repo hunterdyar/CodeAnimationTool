@@ -40,7 +40,7 @@ namespace CodeAnimator
 		}
 		public void AddCharacter(char character)
 		{
-			if (TextUtility.NoRender(character))
+			if (Utility.NoRender(character))
 			{
 				return;
 			}

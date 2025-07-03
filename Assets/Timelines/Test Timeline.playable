@@ -1,23 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-5639876097128112699
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9332edd54d8d4380b7504e119f84f8ed, type: 3}
-  m_Name: TextPlayableAsset(Clone)(Clone)
-  m_EditorClassIdentifier: 
-  template:
-    Style:
-      SetColor: 1
-      Color: {r: 0.6004262, g: 0, b: 1, a: 1}
-      Alpha: 0
-      RenderWidth: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39,6 +21,25 @@ MonoBehaviour:
     m_ScenePreview: 1
   m_DurationMode: 0
   m_MarkerTrack: {fileID: 0}
+--- !u!114 &7757876992577042194
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9332edd54d8d4380b7504e119f84f8ed, type: 3}
+  m_Name: TextPlayableAsset
+  m_EditorClassIdentifier: 
+  template:
+    Style:
+      SetColor: 0
+      Color: {r: 0, g: 1, b: 0.03644657, a: 0}
+      Alpha: 0
+      RenderWidth: 0
+      shrinkWithWidth: 0
 --- !u!114 &8724159151558285568
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -61,19 +62,37 @@ MonoBehaviour:
   m_Children: []
   m_Clips:
   - m_Version: 1
-    m_Start: 4.416666666666667
+    m_Start: 1.0833333333333333
     m_ClipIn: 0
-    m_Asset: {fileID: -5639876097128112699}
-    m_Duration: 6.216666666666667
+    m_Asset: {fileID: 7757876992577042194}
+    m_Duration: 2.4166666666666665
     m_TimeScale: 1
     m_ParentTrack: {fileID: 8724159151558285568}
-    m_EaseInDuration: 0
+    m_EaseInDuration: 0.81
     m_EaseOutDuration: 0
     m_BlendInDuration: -1
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
-      m_Curve: []
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -92,10 +111,10 @@ MonoBehaviour:
     m_PreExtrapolationMode: 0
     m_PostExtrapolationTime: 0
     m_PreExtrapolationTime: 0
-    m_DisplayName: Set Color
+    m_DisplayName: ' Alpha(0.00) Width(0.00)'
   m_Markers:
     m_Objects: []
   TrackSelector:
-    searchText: i
+    searchText: for
     searchType: 1
     Sensitive: 1

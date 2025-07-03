@@ -2,10 +2,11 @@
 using System.Linq;
 using System.Web;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace CodeAnimator
 {
-	public static class TextUtility
+	public static class Utility
 	{
 		public static bool NoRender(char character)
 		{
@@ -117,6 +118,14 @@ namespace CodeAnimator
 		public static Color WithAlpha(this Color color, float alpha)
 		{
 			return new Color(color.r, color.g, color.b, alpha);
+		}
+
+		public static Rect GetScreenRect(Camera camera, float z)
+		{
+			var topLeft = camera.ScreenToWorldPoint(new Vector3(0, 0, z));
+			var botRight = camera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, z));
+			var r = new Rect(topLeft.x, topLeft.y, botRight.x - topLeft.x, botRight.y - topLeft.y);
+			return r;
 		}
 	}
 }

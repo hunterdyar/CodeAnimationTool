@@ -424,7 +424,9 @@ MonoBehaviour:
   font: {fileID: 11400000, guid: 41fed179c11c1304d98a78f3fcf83136, type: 2}
   inputText: "for (int i = 0; i < inputCount; i++)\n{\n\t//some code\n}"
   highlightAsLanguage: 1
-  HighlightLangugage: C#
+  HighlightLanguage: 
+  CenterOnStart: 1
+  ScaleToScreen: 0.9
 --- !u!4 &2066319233
 Transform:
   m_ObjectHideFlags: 0

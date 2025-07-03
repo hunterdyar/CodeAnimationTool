@@ -32,10 +32,21 @@ namespace CodeAnimator
 		private readonly Dictionary<SpanSelector, Span> _spanCache = new Dictionary<SpanSelector, Span>();
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
+
+		[Header("Positioning")] public bool CenterOnStart = true;
+		[Range(0,1)]
+		public float ScaleToScreen = 0.8f;
 		public void Start()
 		{
 			RenderText();
 			_spanCache.Clear();
+
+			if (CenterOnStart)
+			{
+				//center
+				var r = Utility.GetScreenRect(Camera.main, 10);
+				SetAndScaleSelfIntoWorldRect(r, ScaleToScreen);
+			}
 		}
 
 		private void Update()
@@ -71,7 +82,7 @@ namespace CodeAnimator
 				if (ColorUtility.TryParseHtmlString(colorName, out var color))
 				{
 					SetDefaultStyle(kvp.Value, new TextStyle(color));
-				}else if (TextUtility.TryParseRGBColor(colorName, out var color2))
+				}else if (Utility.TryParseRGBColor(colorName, out var color2))
 				{
 					SetDefaultStyle(kvp.Value, new TextStyle(color2));
 				}
@@ -218,7 +229,7 @@ namespace CodeAnimator
 			{
 				if (node is HtmlTextNode textNode)
 				{
-					var text = TextUtility.HtmlDecode(textNode.InnerText);
+					var text = Utility.HtmlDecode(textNode.InnerText);
 					
 					foreach (var c in text)
 					{
@@ -370,13 +381,13 @@ namespace CodeAnimator
 					break;
 				}
 				case TextSearchType.FirstTextMatch:
-					result = TextUtility.GetFirstSubSequence(_renderers, search.ToCharArray());
+					result = Utility.GetFirstSubSequence(_renderers, search.ToCharArray());
 					break;
 				case TextSearchType.LastTextMatch:
-					result = TextUtility.GetLastSubSequence(_renderers, search.ToCharArray());
+					result = Utility.GetLastSubSequence(_renderers, search.ToCharArray());
 					break;
 				case TextSearchType.AllTextMatches:
-					var allSpans = TextUtility.GetAllSubSequence(_renderers, search.ToCharArray());
+					var allSpans = Utility.GetAllSubSequence(_renderers, search.ToCharArray());
 					Span resultSpan = new Span();
 					foreach (var span in allSpans)
 					{
@@ -417,12 +428,29 @@ namespace CodeAnimator
 		}
 
 		//todo: align left, right, etc.
-		public void SetAndScaleSelfIntoWorldRect(Rect rect)
+		public void SetAndScaleSelfIntoWorldRect(Rect rect, float percent)
 		{
 			float totalWidth = _maxRowWidth;
 			float totalHeight = _maxRow;//1 in localSpace for each row/col.
-			//center it.
+			float sizeModifier = 1;
+			float shiftX = 0;
+			float shiftY = 0;
+			if (totalHeight > totalWidth)
+			{
+				sizeModifier = rect.height*percent / totalHeight;
+				shiftY = rect.height * (1 - percent) / 2;
+			}
+			else
+			{
+				sizeModifier = rect.width*percent / totalWidth;
+				shiftX = rect.width * (1 - percent) / 2f;
+			}
+
+			transform.localScale = Vector3.one * sizeModifier;
 			
+			//center it. Our zero is top left, so we need to move from the center we want up and to the left.
+			var centerOffset = new Vector2(-totalWidth / 2f, totalHeight / 2f)+new Vector2(shiftX,shiftY);
+			transform.position = rect.center + centerOffset;
 		}
 		
 		public void SetLayoutDirty()
