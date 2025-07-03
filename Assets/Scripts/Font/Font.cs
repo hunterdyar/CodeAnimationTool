@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -22,6 +23,8 @@ namespace CodeAnimator
 		[SerializeField] private Rect _defaultLetterRect;
 		public float aspect => _defaultLetterRect.width / _defaultLetterRect.height;
 		
+		private Sprite _highlightSprite;
+		private Sprite _underlineSprite;
 		public bool TryGetSprite(Atom atom, out Sprite sprite)
 		{
 			if (fontLookupCache.TryGetValue(atom, out sprite))
@@ -58,6 +61,40 @@ namespace CodeAnimator
 		{
 			//todo overrides for specific letters.
 			return _defaultLetterRect;
+		}
+
+		public Sprite GetUnderlineSprite()
+		{
+			//todo
+			if (TryGetSprite(new Atom('_', FontStyle.Normal), out var sprite))
+			{
+				return sprite;
+			}
+			throw new NotImplementedException("Underline not implemented.");
+		}
+
+		public Sprite GetHighlightSprite()
+		{
+			//todo: dictionary lookup against the rect.
+			if (_highlightSprite != null)
+			{
+				return _highlightSprite;
+			}
+			var blankTex = new Texture2D((int)_defaultLetterRect.width, (int)_defaultLetterRect.height, Atlases[0].atlas.TextureFormat, false);
+			for (int x = 0; x < _defaultLetterRect.width; x++)
+			{
+				for (int y = 0; y < _defaultLetterRect.height; y++)
+				{
+					blankTex.SetPixel(x,y,Color.white);
+				}
+			}
+			blankTex.Apply();
+			
+			//7/9ths is just a magic number. 
+			float realWidth = _defaultLetterRect.width * (7f/9f);
+			
+			_highlightSprite = Sprite.Create(blankTex, new Rect(0,0, realWidth,_defaultLetterRect.height), new Vector2(0.5f, 0.5f));
+			return _highlightSprite;
 		}
 	}
 }

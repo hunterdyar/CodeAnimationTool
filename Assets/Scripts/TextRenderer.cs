@@ -30,6 +30,7 @@ namespace CodeAnimator
 		private int _maxRow;
 		private bool _isLayoutDirty;
 		private readonly Dictionary<SpanSelector, Span> _spanCache = new Dictionary<SpanSelector, Span>();
+		private readonly Dictionary<Span, DecorationRenderer> _decorationRenderers = new Dictionary<Span, DecorationRenderer>();
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
 
@@ -349,6 +350,25 @@ namespace CodeAnimator
 			{
 				atom.SetDefaultColorPercentage(percentDefault);
 				atom.SetStyle(style);
+			}
+		}
+
+		public void SetDecoration(Span span, Decoration decoration)
+		{
+			if (_decorationRenderers.TryGetValue(span, out var renderer))
+			{
+				renderer.RenderDecoration(decoration);
+			}
+			else
+			{
+				var drgo = new GameObject();
+				drgo.transform.SetParent(transform);
+				drgo.gameObject.name = "Decoration Renderer";
+				renderer = drgo.AddComponent<DecorationRenderer>();
+				renderer.textRenderer = this;
+				renderer.decorationSpan = span;
+				_decorationRenderers.Add(span, renderer);
+				renderer.RenderDecoration(decoration);
 			}
 		}
 

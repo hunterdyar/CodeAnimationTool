@@ -8,13 +8,16 @@ public class AtomRenderer : MonoBehaviour
 {
     public Atom Atom => atom;
     private Atom atom;
+    public TextRenderer TextRenderer => textRenderer;
     private TextRenderer textRenderer;
     private SpriteRenderer _spriteRenderer;
 
     public float renderWidthPercentage = 1;
     private TextStyle DefaultStyle;
     private float PercentDefault = 1;
+    public int Row => row;
     private int row;
+    public int Col => col;
     private int col;
     private void Awake()
     {

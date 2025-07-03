@@ -12,6 +12,7 @@ namespace CodeAnimator
 		[SerializeField] int cellsPerRow = 16;
 		[SerializeField] int cellsPerColumn = 16;
 		[SerializeField] string charsetAsString;
+		public TextureFormat TextureFormat => spriteCreationFormat;
 		[SerializeField] private TextureFormat spriteCreationFormat;
 
 
