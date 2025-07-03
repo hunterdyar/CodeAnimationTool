@@ -14,6 +14,17 @@ namespace CodeAnimator
 		private readonly List<SpriteRenderer> _underlineRenderers =  new List<SpriteRenderer>();
 		private readonly List<SpriteRenderer> _highlightRenderers = new List<SpriteRenderer>();
 
+		private OutlineRenderer _outlineRenderer;
+
+		void LazyInitOutline()
+		{
+			if (_outlineRenderer == null)
+			{
+				var child = new GameObject("outline");
+				child.transform.SetParent(transform, false);
+				_outlineRenderer = child.AddComponent<OutlineRenderer>();
+			}
+		}
 
 		private void ClearUnderline()
 		{
@@ -82,6 +93,34 @@ namespace CodeAnimator
 			{
 				ClearHighlight();
 			}
+
+			if (decoration.Outline)
+			{
+				LazyInitOutline();
+				_outlineRenderer.SetActive(true);
+				if (currentDecoration == null || !currentDecoration.Value.Outline)
+				{
+					//we now have an underline.
+					_outlineRenderer.SetFromSpan(decorationSpan);
+					_outlineRenderer.SetLineStyle(decoration.OutlineColor, decoration.OutlineThickness);
+				}
+				else
+				{
+					//the box already exists for this span.
+					if (currentDecoration.Value.OutlineColor != decoration.OutlineColor || !Mathf.Approximately(currentDecoration.Value.OutlineThickness, decoration.OutlineThickness))
+					{
+						_outlineRenderer.SetLineStyle(decoration.OutlineColor, decoration.OutlineThickness);
+					}
+				}
+			}
+			else
+			{
+				if (_outlineRenderer != null)
+				{
+					_outlineRenderer.SetActive(false);
+				}
+			}
+			
 			currentDecoration = decoration;
 		}
 

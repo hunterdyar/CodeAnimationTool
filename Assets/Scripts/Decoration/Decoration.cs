@@ -8,7 +8,7 @@ namespace CodeAnimator
 	{
 		public bool Equals(Decoration other)
 		{
-			return Underline == other.Underline && UnderlineColor.Equals(other.UnderlineColor) && Highlight == other.Highlight && HighlightColor.Equals(other.HighlightColor);
+			return Underline == other.Underline && UnderlineColor.Equals(other.UnderlineColor) && Highlight == other.Highlight && HighlightColor.Equals(other.HighlightColor) && Outline == other.Outline && OutlineThickness.Equals(other.OutlineThickness);
 		}
 
 		public override bool Equals(object obj)
@@ -37,6 +37,9 @@ namespace CodeAnimator
 		public bool Highlight;
 		public Color HighlightColor;
 
+		public bool Outline;
+		public Color OutlineColor;
+		public float OutlineThickness;
 
 		public static Decoration Lerp(Decoration a, Decoration b, float t)
 		{
@@ -62,10 +65,18 @@ namespace CodeAnimator
 			{
 				highlightColor = b.HighlightColor;
 			}
-			// else if (a.Highlight)
-			// {
-			// 	highlightColor = a.HighlightColor;
-			// }
+
+			Color outlineColor = a.OutlineColor;
+			float outlineThickness = a.OutlineThickness;
+			if (a.Outline == b.Outline)
+			{
+				outlineColor = Color.Lerp(a.OutlineColor, b.OutlineColor, t);
+				outlineThickness = Mathf.Lerp(a.OutlineThickness, b.OutlineThickness, t);
+			}else if (b.Outline)
+			{
+				outlineColor = b.OutlineColor;
+				outlineThickness = Mathf.Lerp(a.OutlineThickness, b.OutlineThickness, t);
+			}//else a...
 
 			return new Decoration()
 			{
@@ -73,6 +84,9 @@ namespace CodeAnimator
 				UnderlineColor = underlineColor,
 				Highlight = a.Highlight || b.Highlight,
 				HighlightColor = highlightColor,
+				Outline = a.Outline || b.Outline,
+				OutlineColor = outlineColor,
+				OutlineThickness = outlineThickness,
 			};
 		}
 	}

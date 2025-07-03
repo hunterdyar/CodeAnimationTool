@@ -363,8 +363,13 @@ namespace CodeAnimator
 			{
 				var drgo = new GameObject();
 				drgo.transform.SetParent(transform);
+				
+				
 				drgo.gameObject.name = "Decoration Renderer";
 				renderer = drgo.AddComponent<DecorationRenderer>();
+				renderer.transform.localPosition = Vector3.zero;
+				renderer.transform.localScale = Vector3.one;
+				renderer.transform.localRotation = Quaternion.identity;
 				renderer.textRenderer = this;
 				renderer.decorationSpan = span;
 				_decorationRenderers.Add(span, renderer);

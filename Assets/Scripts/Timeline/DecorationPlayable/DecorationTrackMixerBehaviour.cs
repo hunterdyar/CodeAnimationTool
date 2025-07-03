@@ -12,6 +12,10 @@ namespace CodeAnimator
         // Called every frame that the timeline is evaluated. ProcessFrame is invoked after its inputs.
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
             //SetDefaults(playerData as TextRenderer);
             var trackBinding = (TextRenderer)playerData;
             if (trackBinding == null)
@@ -25,8 +29,12 @@ namespace CodeAnimator
             float highlightAlpha = 0;
             Color blendedUnderline = Color.clear;
             float underlineAlpha = 0;
+            Color blendedOutline = Color.clear;
+            float outlineAlpha = 0;
+            float outlineThickness = 0;
             bool highlight = false;
             bool underline = false;
+            bool outline = false;
             
             float totalWeight = 0f;
 
@@ -50,6 +58,14 @@ namespace CodeAnimator
                     highlightAlpha += input.Decoration.HighlightColor.a * inputWeight;
                     blendedHighlight += input.Decoration.HighlightColor * inputWeight;
                 }
+
+                if (inputWeight > 0 && input.Decoration.Outline)
+                {
+                    outline = true;
+                    outlineAlpha += input.Decoration.OutlineColor.a * inputWeight;
+                    blendedOutline += input.Decoration.OutlineColor * inputWeight;
+                    outlineThickness += input.Decoration.OutlineThickness*inputWeight;
+                }
                 
                 totalWeight += inputWeight;
             }
@@ -64,6 +80,9 @@ namespace CodeAnimator
                 
                 blendedUnderline /= totalWeight;
                 blendedUnderline = blendedUnderline.WithAlpha(underlineAlpha);
+
+                blendedOutline /= totalWeight;
+                blendedOutline = blendedOutline.WithAlpha(outlineAlpha);
             }
             // blend to the default values
             var decoration = new Decoration()
@@ -72,6 +91,9 @@ namespace CodeAnimator
                 HighlightColor = blendedHighlight,
                 Underline = underline,
                 UnderlineColor = blendedUnderline,
+                Outline = outline,
+                OutlineColor = blendedOutline,
+                OutlineThickness = outlineThickness,
             };
            var span = trackBinding.GetSpan(Selector);
            if (span != null)
@@ -79,38 +101,5 @@ namespace CodeAnimator
                trackBinding.SetDecoration(span, decoration);
            }
         }
-
-        // Invoked when the playable graph is destroyed, typically when PlayableDirector.Stop is called or the timeline
-        // is complete.
-        // public override void OnPlayableDestroy(Playable playable)
-        // {
-        //     RestoreDefaults();
-        // }
-        //
-        // void SetDefaults(TextRenderer text)
-        // {
-        //     // if (text == )
-        //         // return;
-        //     
-        //     RestoreDefaults();
-        //     
-        //     m_TrackBinding = text;
-        //     if (m_TrackBinding != null)
-        //     {
-        //         m_DefaultColor = m_TrackBinding.color;
-        //         m_DefaultFontSize = m_TrackBinding.fontSize;
-        //         m_DefaultText = m_TrackBinding.text;
-        //     }
-        // }
-        //
-        // void RestoreDefaults()
-        // {
-        //     // if (m_TrackBinding == null)
-        //     //     return;
-        //     //
-        //     // m_TrackBinding.color = m_DefaultColor;
-        //     // m_TrackBinding.fontSize = m_DefaultFontSize;
-        //     // m_TrackBinding.text = m_DefaultText;
-        // }
     }
 }

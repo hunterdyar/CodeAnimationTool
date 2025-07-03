@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CodeAnimator;
 using UnityEngine;
 using Font = CodeAnimator.Font;
@@ -118,5 +119,15 @@ public class AtomRenderer : MonoBehaviour
         }
         _spriteRenderer.color = style.GetColorWithAlpha();
         
+    }
+
+    public IEnumerable<Vector3> GetCorners()
+    {
+        var p = textRenderer.GetLetterPosition(this.col, this.row);
+        
+        yield return new Vector3(p.x-renderWidthPercentage/2, p.y-0.5f, p.z);
+        yield return new Vector3(p.x+renderWidthPercentage/2, p.y-0.5f, p.z);
+        yield return new Vector3(p.x-renderWidthPercentage/2, p.y+.5f, p.z);
+        yield return new Vector3(p.x+renderWidthPercentage/2, p.y+.5f, p.z);
     }
 }
