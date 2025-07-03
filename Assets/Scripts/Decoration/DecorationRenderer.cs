@@ -32,7 +32,7 @@ namespace CodeAnimator
 					break;
 				case DecorationType.SurroundBox:
 					throw new NotImplementedException();
-					break;
+					//break;
 			}
 		}
 		
