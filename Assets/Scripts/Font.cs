@@ -8,7 +8,7 @@ namespace CodeAnimator
 	public class FontAtlasLookup
 	{
 		public FontAtlas atlas;
-		public TextStyle textStyle;
+		public FontStyle fontStyle;
 	}
 	[CreateAssetMenu(fileName = "Font", menuName = "CodeAnim/Font", order = 0)]
 	public class Font : ScriptableObject
@@ -28,7 +28,7 @@ namespace CodeAnimator
 				return true;
 			}
 
-			var fal = Atlases.FirstOrDefault(x => x.textStyle == atom.CharacterStyle);
+			var fal = Atlases.FirstOrDefault(x => x.fontStyle == atom.FontStyle);
 			if (fal == null)
 			{
 				sprite = null;

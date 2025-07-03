@@ -42,9 +42,8 @@ namespace CodeAnimator
 			_processedText = PreProcessText(inputText);
 			Clear();
 
-			//Walk! this popualtes contexts and spans, and callback creates children.
+			//Walk! this populates contexts and spans, and callback creates children.
 			var walk = RenderAsHTML(_processedText);
-
 
 			if (styles.TryGetValue("color", out var colors))
 			{
@@ -53,25 +52,14 @@ namespace CodeAnimator
 					var colorName = kvp.Key.Trim().ToLower();
 					if (ColorUtility.TryParseHtmlString(colorName, out var color))
 					{
-						SetDefaultColor(kvp.Value, color);
-					}else if (colorName.StartsWith("rgb"))
+						SetDefaultStyle(kvp.Value, new TextStyle(color));
+					}else if (TextUtility.TryParseRGBColor(colorName, out var color2))
 					{
-						//rgb(r,g,b)
-						var clean = colorName.Replace("rgb", string.Empty).Replace("(", string.Empty)
-							.Replace(")", string.Empty);
-						var vals =  clean.Split(',');
-						if (vals.Length == 3)
-						{
-							var r = int.Parse(vals[0]) / 255f;
-							var g = int.Parse(vals[1]) / 255f;
-							var b = int.Parse(vals[2]) / 255f;
-							Color c = new Color(r, g, b);
-							SetDefaultColor(kvp.Value, c);
-						}
-						else
-						{
-							Debug.Log($"Huh? rgb {vals.Length} from {colorName}");
-						}
+						SetDefaultStyle(kvp.Value, new TextStyle(color));
+					}
+					else
+					{
+						Debug.LogError($"Parse error. Bad color: {colorName}");
 					}
 				}
 			} 
@@ -236,7 +224,7 @@ namespace CodeAnimator
 
 		public void AddCharacter(char c, WalkContext context)
 		{
-			var atom = new Atom(c, TextStyle.Normal);
+			var atom = new Atom(c, FontStyle.Normal);
 			var argo = new GameObject();
 			argo.transform.SetParent(transform);
 			argo.name = c.ToString();
@@ -315,20 +303,20 @@ namespace CodeAnimator
 		}
 
 
-		public void SetDefaultColor(Span span, Color color)
+		public void SetDefaultStyle(Span span, TextStyle style)
 		{
 			foreach (var atom in span.Atoms)
 			{
 				atom.SetDefaultColorPercentage(1);
-				atom.SetColor(color, true);
+				atom.SetStyle(style, true);
 			}
 		}
-		public void SetColor(Span span, Color color, float defaultPercentage)
+		public void SetStyle(Span span, TextStyle style, float percentDefault)
 		{
 			foreach (var atom in span.Atoms)
 			{
-				atom.SetDefaultColorPercentage(defaultPercentage);
-				atom.SetColor(color, false);
+				atom.SetDefaultColorPercentage(percentDefault);
+				atom.SetStyle(style, false);
 			}
 		}
 

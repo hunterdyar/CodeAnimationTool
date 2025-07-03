@@ -11,7 +11,7 @@ namespace CodeAnimator
     public class TextPlayableBehaviour : PlayableBehaviour
     {
         [Tooltip("The color of the text")]
-        public Color color = Color.white;
+        public TextStyle Style;
 
         public string DisplayName()
         {

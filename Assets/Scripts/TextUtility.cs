@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using UnityEngine;
 
 namespace CodeAnimator
 {
@@ -87,6 +88,35 @@ namespace CodeAnimator
 			}
 			
 			return results;
+		}
+
+		public static bool TryParseRGBColor(string input, out Color color)
+		{
+			input = input.Trim().ToLower();
+			if(input.StartsWith("rgb"))
+			{
+				//rgb(r,g,b)
+				var clean = input.Replace("rgb", string.Empty).Replace("(", string.Empty)
+					.Replace(")", string.Empty);
+				var vals = clean.Split(',');
+				if (vals.Length == 3)
+				{
+					var r = int.Parse(vals[0]) / 255f;
+					var g = int.Parse(vals[1]) / 255f;
+					var b = int.Parse(vals[2]) / 255f;
+					color = new Color(r, g, b);
+					return true;
+				}
+				
+			}
+
+			color = Color.white;
+			return false;
+		}
+
+		public static Color WithAlpha(this Color color, float alpha)
+		{
+			return new Color(color.r, color.g, color.b, alpha);
 		}
 	}
 }

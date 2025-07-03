@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: TextPlayableAsset
   m_EditorClassIdentifier: 
   template:
-    color: {r: 0.45221052, g: 0.1496529, b: 0.5566038, a: 1}
+    Style:
+      SetColor: 0
+      Color: {r: 1, g: 0.5280087, b: 0, a: 1}
+      Alpha: 0
 --- !u!114 &-5639876097128112699
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -27,7 +30,10 @@ MonoBehaviour:
   m_Name: TextPlayableAsset(Clone)(Clone)
   m_EditorClassIdentifier: 
   template:
-    color: {r: 0.118169546, g: 1, b: 0, a: 1}
+    Style:
+      SetColor: 1
+      Color: {r: 0.6004262, g: 0, b: 1, a: 1}
+      Alpha: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

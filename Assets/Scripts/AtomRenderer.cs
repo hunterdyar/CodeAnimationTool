@@ -11,7 +11,7 @@ public class AtomRenderer : MonoBehaviour
     private TextRenderer textRenderer;
     private SpriteRenderer _spriteRenderer;
 
-    private Color DefaultColor;
+    private TextStyle DefaultStyle;
     private float PercentDefault = 1;
     private void Awake()
     {
@@ -47,24 +47,32 @@ public class AtomRenderer : MonoBehaviour
     {
         PercentDefault = f;
     }
-    public void SetColor(Color color, bool setDefault = false)
+    public void SetStyle(TextStyle style, bool setDefault = false)
     {
         if (_spriteRenderer != null)
         {
             if (setDefault)
             {
-                DefaultColor = color;
+                DefaultStyle = style;
             }
             else
             {
-                if (color.a < 1f)
+                //apply as slight tint if that's what we are doing, away from default.
+                //var c = Color.Lerp(DefaultStyle.Color, style.Color, style.Color.a);
+                var s = TextStyle.Lerp(style, DefaultStyle, PercentDefault);
+                if (style.SetColor)
                 {
-                    var c = Color.Lerp(DefaultColor, color, color.a);
-                    _spriteRenderer.color = c;
-                    return;
+                    _spriteRenderer.color = s.GetColorWithAlpha();
                 }
+                else
+                {
+                    _spriteRenderer.color = DefaultStyle.Color.WithAlpha(s.Alpha);
+                }
+
+                return;
             }
-            _spriteRenderer.color = color;
+            
+            _spriteRenderer.color = style.GetColorWithAlpha();
         }
         else
         {

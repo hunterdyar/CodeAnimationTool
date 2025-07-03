@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -23,34 +24,31 @@ namespace CodeAnimator
             int inputCount = playable.GetInputCount();
             
             Color blendedColor = Color.clear;
+            float blendedAlpha = 0f;
             float totalWeight = 0f;
             float greatestWeight = 0f;
+
             
             for (int i = 0; i < inputCount; i++)
             {
                 float inputWeight = playable.GetInputWeight(i);
-                ScriptPlayable<TextPlayableBehaviour> inputPlayable = (ScriptPlayable<TextPlayableBehaviour>)playable.GetInput(i);
+                ScriptPlayable<TextPlayableBehaviour> inputPlayable =
+                    (ScriptPlayable<TextPlayableBehaviour>)playable.GetInput(i);
                 TextPlayableBehaviour input = inputPlayable.GetBehaviour();
-                
-                blendedColor += input.color * inputWeight;
-                totalWeight += inputWeight;
 
-                // use the text with the highest weight
-                if (inputWeight > greatestWeight)
-                {
-                    // text = input.text;
-                    greatestWeight = inputWeight;
-                }
-                
+                blendedColor += input.Style.Color * inputWeight;
+                blendedAlpha += input.Style.Alpha * inputWeight;
+                totalWeight += inputWeight;
             }
 
+            float percentageDefault = 1 - totalWeight;
+
             // blend to the default values
-            var color = Color.Lerp(Color.clear, blendedColor, totalWeight);
-           
+            var style = new TextStyle(blendedColor, totalWeight > 0 ? blendedAlpha/totalWeight : 0f);
            var span = trackBinding.GetSpan(Selector);
            if (span != null)
            {
-               trackBinding.SetColor(span, color, totalWeight);
+               trackBinding.SetStyle(span, style, percentageDefault);
            }
         }
 

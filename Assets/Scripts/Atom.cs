@@ -4,16 +4,16 @@
 	public struct Atom
 	{
 		public char Character;
-		public TextStyle CharacterStyle;
+		public FontStyle FontStyle;
 
-		public Atom(char character, TextStyle normal)
+		public Atom(char character, FontStyle normal)
 		{
 			Character  = character;
-			CharacterStyle = normal;
+			FontStyle = normal;
 		}
 	}
 
-	public enum TextStyle
+	public enum FontStyle
 	{
 		Normal,
 		Italic,
