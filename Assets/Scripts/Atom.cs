@@ -1,5 +1,8 @@
 ﻿namespace CodeAnimator
 {
+	/// <summary>
+	/// An atom is a single character of text that we pull from a font atlas. THis means it's a character and style (bold, italic, etc).
+	/// </summary>
 	[System.Serializable]
 	public struct Atom
 	{

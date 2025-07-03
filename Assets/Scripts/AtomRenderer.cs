@@ -11,8 +11,11 @@ public class AtomRenderer : MonoBehaviour
     private TextRenderer textRenderer;
     private SpriteRenderer _spriteRenderer;
 
+    public float renderWidthPercentage = 1;
     private TextStyle DefaultStyle;
     private float PercentDefault = 1;
+    private int row;
+    private int col;
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -45,9 +48,16 @@ public class AtomRenderer : MonoBehaviour
         }
         this.textRenderer = textRenderer;
         this.atom = atom;
+        this.row = r;
+        this.col = c;
         _spriteRenderer =  GetComponent<SpriteRenderer>();
         Render();
-        transform.localPosition = new Vector3(c*textRenderer.Font.aspect, -r, 0);
+        transform.localPosition = textRenderer.GetLetterPosition(c, r);
+    }
+
+    public void UpdatePosition()
+    {
+        transform.localPosition = textRenderer.GetLetterPosition(this.col, this.row);
     }
 
     public void SetDefaultColorPercentage(float f)
@@ -56,34 +66,54 @@ public class AtomRenderer : MonoBehaviour
     }
     public void SetStyle(TextStyle style, bool setDefault = false)
     {
-        if (_spriteRenderer != null)
-        {
-            if (setDefault)
-            {
-                DefaultStyle = style;
-            }
-            else
-            {
-                //apply as slight tint if that's what we are doing, away from default.
-                //var c = Color.Lerp(DefaultStyle.Color, style.Color, style.Color.a);
-                var s = TextStyle.Lerp(style, DefaultStyle, PercentDefault);
-                if (style.SetColor)
-                {
-                    _spriteRenderer.color = s.GetColorWithAlpha();
-                }
-                else
-                {
-                    _spriteRenderer.color = DefaultStyle.Color.WithAlpha(s.Alpha);
-                }
-
-                return;
-            }
-            
-            _spriteRenderer.color = style.GetColorWithAlpha();
-        }
-        else
+        if (_spriteRenderer == null)
         {
             Debug.LogWarning("No sprite renderer");
         }
+        
+        if (setDefault)
+        {
+            DefaultStyle = style;
+        }
+        else
+        {
+            //apply as slight tint if that's what we are doing, away from default.
+            //var c = Color.Lerp(DefaultStyle.Color, style.Color, style.Color.a);
+            var s = TextStyle.Lerp(style, DefaultStyle, PercentDefault);
+            if (style.SetColor)
+            {
+                _spriteRenderer.color = s.GetColorWithAlpha();
+            }
+            else
+            {
+                _spriteRenderer.color = DefaultStyle.Color.WithAlpha(s.Alpha);
+            }
+
+
+            if (!Mathf.Approximately(s.RenderWidth, renderWidthPercentage))
+            {
+                textRenderer.SetLayoutDirty();
+            }
+            
+            renderWidthPercentage = s.RenderWidth;
+            if (style.shrinkWithWidth)
+            {
+                transform.localScale = new Vector3(s.RenderWidth, transform.localScale.y, transform.localScale.z);
+            }
+
+            return;
+        }
+
+        if (!Mathf.Approximately(style.RenderWidth, renderWidthPercentage))
+        {
+            textRenderer.SetLayoutDirty();
+        }
+        renderWidthPercentage = style.RenderWidth;
+        if (style.shrinkWithWidth)
+        {
+            transform.localScale = new Vector3(style.RenderWidth, transform.localScale.y, transform.localScale.z);
+        }
+        _spriteRenderer.color = style.GetColorWithAlpha();
+        
     }
 }

@@ -17,11 +17,15 @@ namespace CodeAnimator
 		[Range(0f, 1f)]
 		public float Alpha;
 
-		public TextStyle(Color color, float alpha)
+		[Min(0)] public float RenderWidth;
+		public bool shrinkWithWidth;
+		public TextStyle(Color color, float alpha = 1, float width = 1f, bool setColor = true, bool shrinkWithWidth = true)
 		{
-			this.SetColor = true;
+			this.SetColor = setColor;
 			this.Color = color;
 			this.Alpha = alpha;
+			this.RenderWidth = width;
+			this.shrinkWithWidth = shrinkWithWidth;
 		}
 
 		public TextStyle(Color color)
@@ -29,6 +33,8 @@ namespace CodeAnimator
 			this.SetColor = true;
 			this.Color = color;
 			this.Alpha = 1.0f;
+			this.RenderWidth = 1f;
+			this.shrinkWithWidth = true;
 		}
 
 		public Color GetColorWithAlpha()
@@ -47,7 +53,9 @@ namespace CodeAnimator
 		{
 			Color col = Color.Lerp(a.Color, b.Color, t);
 			float alpha = Mathf.Lerp(a.Alpha, b.Alpha, t);
-			return new TextStyle(col, alpha);
+			float width = Mathf.Lerp(a.RenderWidth, b.RenderWidth, t);
+			//todo;fix bools
+			return new TextStyle(col, alpha, width);
 		}
 	}
 }

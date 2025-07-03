@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ColorCode;
 using UnityEngine;
 using HtmlAgilityPack;
+using UnityEditor.Searcher;
 
 namespace CodeAnimator
 {
@@ -23,7 +25,10 @@ namespace CodeAnimator
 		private readonly Dictionary<string, Span> _htmlIdSpans = new Dictionary<string, Span>();
 		public bool highlightAsLanguage;
 		public string HighlightLanguage;
-
+		private float _maxRowWidth;
+		private int _maxCol;
+		private int _maxRow;
+		private bool _isLayoutDirty;
 		private readonly Dictionary<SpanSelector, Span> _spanCache = new Dictionary<SpanSelector, Span>();
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
@@ -31,6 +36,18 @@ namespace CodeAnimator
 		{
 			RenderText();
 			_spanCache.Clear();
+		}
+
+		private void Update()
+		{
+			if (_isLayoutDirty)
+			{
+				foreach (var renderer in _renderers)
+				{
+					renderer.UpdatePosition();
+				}
+				_isLayoutDirty = false;
+			}
 		}
 
 		[ContextMenu("Render Text")]
@@ -262,6 +279,9 @@ namespace CodeAnimator
 			{
 				Debug.LogWarning($"Key {context.X}:{context.Y} is already in the list.");
 			}
+
+			_maxRow = Mathf.Max(_maxRow, context.Y);
+			_maxCol = Mathf.Max(_maxCol, context.X);
 		}
 		
 		public Span GetSpanForRange(int startRow, int startColumn, int endRow, int endColumn)
@@ -372,6 +392,42 @@ namespace CodeAnimator
 			
 			_spanCache.Add(selector,result);
 			return result;
+		}
+
+		public Vector3 GetLetterPosition(int c, int r)
+		{
+			//get the width by walking along and adding up all the display percentages.
+			
+			float wPosition = 0;
+			for (int i = 0; i < c; i++)
+			{
+				var pos = new Vector2Int(i, r);
+				if (_startingPosRenderers.TryGetValue(pos, out var ren))
+				{
+					wPosition += Font.aspect * ren.renderWidthPercentage;
+				}
+				else
+				{
+					wPosition += font.aspect;
+				}
+			}
+			
+			_maxRowWidth = Mathf.Max(wPosition, _maxRowWidth);
+			return new Vector3(wPosition, -r, 0);
+		}
+
+		//todo: align left, right, etc.
+		public void SetAndScaleSelfIntoWorldRect(Rect rect)
+		{
+			float totalWidth = _maxRowWidth;
+			float totalHeight = _maxRow;//1 in localSpace for each row/col.
+			//center it.
+			
+		}
+		
+		public void SetLayoutDirty()
+		{
+			_isLayoutDirty = true;
 		}
 	}
 }

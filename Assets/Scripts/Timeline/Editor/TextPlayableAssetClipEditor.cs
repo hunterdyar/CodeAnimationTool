@@ -18,6 +18,26 @@ namespace CodeAnimator
                 clip.displayName = textPlayableasset.template.DisplayName();
             }
         }
+
+        public override ClipDrawOptions GetClipOptions(TimelineClip clip)
+        {
+            var clipOptions = base.GetClipOptions(clip);
+
+            var textPlayableasset = clip.asset as TextPlayableAsset;
+            if (textPlayableasset != null)
+            {
+                if (textPlayableasset.template.Style.SetColor)
+                {
+                    clipOptions.highlightColor = textPlayableasset.template.Style.GetColorWithAlpha();
+                }
+                else
+                {
+                    clipOptions.highlightColor = Color.black.WithAlpha(textPlayableasset.template.Style.Alpha);
+                }
+            }
+
+            return clipOptions;
+        }
     }
 }
 

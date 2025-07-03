@@ -23,8 +23,12 @@ namespace CodeAnimator
             
             Color blendedColor = Color.clear;
             float blendedAlpha = 0f;
-            float totalWeight = 0f;
+            float blendedWidth = 0f;
             
+            float totalWeight = 0f;
+            float totalColorWeight = 0f;
+            bool setColor = false;
+            bool shrink = false;
             for (int i = 0; i < inputCount; i++)
             {
                 float inputWeight = playable.GetInputWeight(i);
@@ -32,15 +36,29 @@ namespace CodeAnimator
                     (ScriptPlayable<TextPlayableBehaviour>)playable.GetInput(i);
                 TextPlayableBehaviour input = inputPlayable.GetBehaviour();
 
-                blendedColor += input.Style.Color * inputWeight;
+                if (input.Style.SetColor)
+                {
+                    blendedColor += input.Style.Color * inputWeight;
+                    totalColorWeight += inputWeight;
+                    if (inputWeight > 0)
+                    {
+                        setColor = true; //if any inputs set color, we set color.
+                    }
+                }
                 blendedAlpha += input.Style.Alpha * inputWeight;
+                blendedWidth += input.Style.RenderWidth * inputWeight;
                 totalWeight += inputWeight;
+                if (input.Style.shrinkWithWidth && input.Style.RenderWidth != 1 && inputWeight > 0)
+                {
+                    shrink = true;
+                }
             }
 
             float percentageDefault = 1 - totalWeight;
-
+            float a = totalWeight > 0 ? blendedAlpha / totalWeight : 0f;
+            float w = totalWeight > 0 ? blendedWidth / totalWeight : 1f;
             // blend to the default values
-            var style = new TextStyle(blendedColor, totalWeight > 0 ? blendedAlpha/totalWeight : 0f);
+            var style = new TextStyle(blendedColor, a, w, setColor, shrink);
            var span = trackBinding.GetSpan(Selector);
            if (span != null)
            {

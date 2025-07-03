@@ -1,5 +1,7 @@
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -12,10 +14,31 @@ namespace CodeAnimator
     {
         [Tooltip("The color of the text")]
         public TextStyle Style;
-
+        
         public string DisplayName()
         {
-            return "Set Color";
+            var namePieces = "";
+            if (Style.SetColor)
+            {
+                namePieces += ("Set Color");
+            }
+
+            if (Style.Alpha < 1)
+            {
+                namePieces += $" Alpha({Style.Alpha:N2})";
+            }
+
+            if (Style.RenderWidth != 1)
+            {
+                namePieces += ($" Width({Style.RenderWidth:N2})");
+            }
+
+            if (namePieces.Length == 0)
+            {
+                return "Normal";
+            }
+
+            return namePieces;
         }
     }
 }

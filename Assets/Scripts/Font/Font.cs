@@ -10,6 +10,7 @@ namespace CodeAnimator
 		public FontAtlas atlas;
 		public FontStyle fontStyle;
 	}
+	
 	[CreateAssetMenu(fileName = "Font", menuName = "CodeAnim/Font", order = 0)]
 	public class Font : ScriptableObject
 	{
