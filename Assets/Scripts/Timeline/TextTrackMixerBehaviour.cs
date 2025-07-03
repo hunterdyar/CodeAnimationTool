@@ -44,7 +44,7 @@ namespace CodeAnimator
            var span = trackBinding.GetSpan(Selector);
            if (span != null)
            {
-               trackBinding.SetStyle(span, style, percentageDefault);
+               TextRenderer.SetStyle(span, style, percentageDefault);
            }
         }
 

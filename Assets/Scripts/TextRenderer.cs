@@ -3,7 +3,6 @@ using System.Linq;
 using ColorCode;
 using UnityEngine;
 using HtmlAgilityPack;
-using UnityEngine.Rendering;
 
 namespace CodeAnimator
 {
@@ -14,25 +13,24 @@ namespace CodeAnimator
 		[SerializeField] Font font;
 		[TextArea,SerializeField] private string inputText;
 		private string _processedText;
-		private Dictionary<Vector2Int, AtomRenderer> startingPosRenderers = new Dictionary<Vector2Int, AtomRenderer>();
-		private List<AtomRenderer> renderers = new List<AtomRenderer>();
-		private int[] LineLengths;
-		private List<Span> LineSpans;
-		private List<Span> ColumnSpans;
-		private Dictionary<string, Span> classSpans = new Dictionary<string, Span>();
-		private Dictionary<string, Dictionary<string, Span>> styles = new Dictionary<string, Dictionary<string, Span>>();
-		private Dictionary<string, Span> idSpans = new Dictionary<string, Span>();
+		private readonly Dictionary<Vector2Int, AtomRenderer> _startingPosRenderers = new Dictionary<Vector2Int, AtomRenderer>();
+		private readonly List<AtomRenderer> _renderers = new List<AtomRenderer>();
+		private int[] _lineLengths;
+		private List<Span> _lineSpans;
+		private List<Span> _columnSpans;
+		private readonly Dictionary<string, Span> _htmlClassSpans = new Dictionary<string, Span>();
+		private readonly Dictionary<string, Dictionary<string, Span>> _styles = new Dictionary<string, Dictionary<string, Span>>();
+		private readonly Dictionary<string, Span> _htmlIdSpans = new Dictionary<string, Span>();
 		public bool highlightAsLanguage;
-		public string HighlightLangugage;
+		public string HighlightLanguage;
 
-		private Dictionary<SpanSelector, Span> SpanCache = new Dictionary<SpanSelector, Span>();
-		//oublic bool html
+		private readonly Dictionary<SpanSelector, Span> _spanCache = new Dictionary<SpanSelector, Span>();
 		//spans are separate, and are just lists of various atoms.
 		//We can also search processed text 
 		public void Start()
 		{
 			RenderText();
-			SpanCache.Clear();
+			_spanCache.Clear();
 		}
 
 		[ContextMenu("Render Text")]
@@ -43,26 +41,28 @@ namespace CodeAnimator
 			Clear();
 
 			//Walk! this populates contexts and spans, and callback creates children.
-			var walk = RenderAsHTML(_processedText);
+			RenderAsHTML(_processedText);
 
-			if (styles.TryGetValue("color", out var colors))
+			if (!_styles.TryGetValue("color", out var colors))
 			{
-				foreach (var kvp in colors)
+				return;
+			}
+			
+			foreach (var kvp in colors)
+			{
+				string colorName = kvp.Key.Trim().ToLower();
+				if (ColorUtility.TryParseHtmlString(colorName, out var color))
 				{
-					var colorName = kvp.Key.Trim().ToLower();
-					if (ColorUtility.TryParseHtmlString(colorName, out var color))
-					{
-						SetDefaultStyle(kvp.Value, new TextStyle(color));
-					}else if (TextUtility.TryParseRGBColor(colorName, out var color2))
-					{
-						SetDefaultStyle(kvp.Value, new TextStyle(color));
-					}
-					else
-					{
-						Debug.LogError($"Parse error. Bad color: {colorName}");
-					}
+					SetDefaultStyle(kvp.Value, new TextStyle(color));
+				}else if (TextUtility.TryParseRGBColor(colorName, out var color2))
+				{
+					SetDefaultStyle(kvp.Value, new TextStyle(color2));
 				}
-			} 
+				else
+				{
+					Debug.LogError($"Parse error. Bad color: {colorName}");
+				}
+			}
 		}
 		private string PreProcessText(string input)
 		{
@@ -90,19 +90,14 @@ namespace CodeAnimator
 			var html = new HtmlDocument();
 			html.LoadHtml(source);
 
-			var context = new WalkContext();
-			context.SpacesForTabs = Font.gapsPerTab;
-			context.AddCharacterCallback = AddCharacter;
+			var context = new WalkContext
+			{
+				SpacesForTabs = Font.gapsPerTab,
+				AddCharacterCallback = AddCharacter
+			};
+			
 			WalkHTMLNode(html.DocumentNode, ref context);
 			return context;
-		}
-
-		private void WalkHTMLNode(HtmlNodeCollection nodes, ref WalkContext context)
-		{
-			foreach (var node in nodes)
-			{
-				WalkHTMLNode(node, ref context);
-			}
 		}
 
 		private void WalkHTMLNode(HtmlNode node, ref WalkContext context)
@@ -120,19 +115,19 @@ namespace CodeAnimator
 
 			if (node.NodeType == HtmlNodeType.Element)
 			{
-				int scount = 0;
+				int sCount = 0;
 				foreach (var cl in node.GetClasses())
 				{
-					if (classSpans.TryGetValue(cl, out var span))
+					if (_htmlClassSpans.TryGetValue(cl, out var span))
 					{
 						context.PushSpan(span);
-						scount++;
+						sCount++;
 					}
 					else
 					{
 						var s = context.PushSpan();
-						classSpans.Add(cl, s);
-						scount++;
+						_htmlClassSpans.Add(cl, s);
+						sCount++;
 					}
 				}
 
@@ -154,11 +149,11 @@ namespace CodeAnimator
 						}
 						var key = kvp[0].Trim();
 						var styleValue = kvp[1].Trim();
-						if (!styles.ContainsKey(key))
+						if (!_styles.ContainsKey(key))
 						{
-							styles.Add(key, new Dictionary<string, Span>());
+							_styles.Add(key, new Dictionary<string, Span>());
 						}
-						if (styles.TryGetValue(key, out var styleKeyDict))
+						if (_styles.TryGetValue(key, out var styleKeyDict))
 						{
 							if (styleKeyDict.TryGetValue(styleValue, out Span styleValueSpan))
 							{
@@ -166,13 +161,13 @@ namespace CodeAnimator
 								if (!context.Spans.Contains(styleValueSpan))
 								{
 									context.PushSpan(styleValueSpan);
-									scount++;
+									sCount++;
 								}
 							}
 							else
 							{
 								styleKeyDict.Add(styleValue, context.PushSpan());
-								scount++;
+								sCount++;
 							}
 						}
 						else
@@ -185,13 +180,13 @@ namespace CodeAnimator
 
 				if (!string.IsNullOrEmpty(node.Id))
 				{
-					idSpans.Add(node.Id, context.PushSpan());
-					scount++;
+					_htmlIdSpans.Add(node.Id, context.PushSpan());
+					sCount++;
 				}
 				
 				var children = node.ChildNodes;
 				WalkHTMLNode(children, ref context);
-				context.PopSpans(scount);
+				context.PopSpans(sCount);
 			}
 			else if (node.NodeType == HtmlNodeType.Document)
 			{
@@ -212,8 +207,6 @@ namespace CodeAnimator
 					{
 						context.AddCharacter(c);
 					}
-
-					return;
 				}
 				else
 				{
@@ -222,7 +215,15 @@ namespace CodeAnimator
 			}
 		}
 
-		public void AddCharacter(char c, WalkContext context)
+		private void WalkHTMLNode(HtmlNodeCollection nodes, ref WalkContext context)
+		{
+			foreach (var node in nodes)
+			{
+				WalkHTMLNode(node, ref context);
+			}
+		}
+
+		private void AddCharacter(char c, WalkContext context)
 		{
 			var atom = new Atom(c, FontStyle.Normal);
 			var argo = new GameObject();
@@ -231,18 +232,18 @@ namespace CodeAnimator
 			var ar = argo.AddComponent<AtomRenderer>();
 			ar.Init(atom, context.X, context.Y, this);
 
-			while (LineSpans.Count <= context.Y)
+			while (_lineSpans.Count <= context.Y)
 			{
-				LineSpans.Add(new Span());
+				_lineSpans.Add(new Span());
 			}
 
-			while (ColumnSpans.Count <= context.X)
+			while (_columnSpans.Count <= context.X)
 			{
-				ColumnSpans.Add(new Span());
+				_columnSpans.Add(new Span());
 			}
 
-			LineSpans[context.Y].AddAtom(ar);
-			ColumnSpans[context.X].AddAtom(ar);
+			_lineSpans[context.Y].AddAtom(ar);
+			_columnSpans[context.X].AddAtom(ar);
 
 			foreach (var span in context.Spans)
 			{
@@ -250,12 +251,12 @@ namespace CodeAnimator
 			}
 			
 			//ordered list
-			renderers.Add(ar);
+			_renderers.Add(ar);
 			
 			//xy indexed list
-			if (!startingPosRenderers.ContainsKey(new Vector2Int(context.X, context.Y)))
+			if (!_startingPosRenderers.ContainsKey(new Vector2Int(context.X, context.Y)))
 			{
-				startingPosRenderers.Add(new Vector2Int(context.X, context.Y), ar);
+				_startingPosRenderers.Add(new Vector2Int(context.X, context.Y), ar);
 			}
 			else
 			{
@@ -270,10 +271,10 @@ namespace CodeAnimator
 			while (r <= endRow)
 			{
 				var c = r == startRow ? startColumn : 0;
-				var end = r == endRow ? endColumn : LineLengths[r];
+				var end = r == endRow ? endColumn : _lineLengths[r];
 				while (c <= end)
 				{
-					if (startingPosRenderers.TryGetValue(new Vector2Int(r, c), out AtomRenderer value))
+					if (_startingPosRenderers.TryGetValue(new Vector2Int(r, c), out AtomRenderer value))
 					{
 						s.AddAtom(value);
 					}
@@ -287,23 +288,22 @@ namespace CodeAnimator
 		
 		private void Clear()
 		{
-			foreach (var atom in startingPosRenderers.Values)
+			foreach (var atom in _startingPosRenderers.Values)
 			{
 				Destroy(atom.gameObject);
 			}
 			
-			LineSpans  = new List<Span>();
-			ColumnSpans = new List<Span>();
-			styles.Clear();
-			idSpans.Clear();
-			classSpans.Clear();
-			renderers.Clear();
-			SpanCache.Clear();
-			startingPosRenderers.Clear();
+			_lineSpans  = new List<Span>();
+			_columnSpans = new List<Span>();
+			_styles.Clear();
+			_htmlIdSpans.Clear();
+			_htmlClassSpans.Clear();
+			_renderers.Clear();
+			_spanCache.Clear();
+			_startingPosRenderers.Clear();
 		}
 
-
-		public void SetDefaultStyle(Span span, TextStyle style)
+		private static void SetDefaultStyle(Span span, TextStyle style)
 		{
 			foreach (var atom in span.Atoms)
 			{
@@ -311,28 +311,29 @@ namespace CodeAnimator
 				atom.SetStyle(style, true);
 			}
 		}
-		public void SetStyle(Span span, TextStyle style, float percentDefault)
+
+		public static void SetStyle(Span span, TextStyle style, float percentDefault)
 		{
-			foreach (var atom in span.Atoms)
+			foreach (AtomRenderer atom in span.Atoms)
 			{
 				atom.SetDefaultColorPercentage(percentDefault);
-				atom.SetStyle(style, false);
+				atom.SetStyle(style);
 			}
 		}
 
 		public Span GetSpan(SpanSelector selector)
 		{
-			if (SpanCache.TryGetValue(selector, out var cachedSpan))
+			if (_spanCache.TryGetValue(selector, out var cachedSpan))
 			{
 				return cachedSpan;
 			}
 			string search = selector.Sensitive == CaseSensitive.CaseSensitive ? selector.searchText : selector.searchText.ToLower();
-			Span result = null;
+			Span result;
 			switch (selector.searchType)
 			{
 				case TextSearchType.HTMLId:
 				{
-					if (!idSpans.TryGetValue(search, out result))
+					if (!_htmlIdSpans.TryGetValue(search, out result))
 					{
 						Debug.LogWarning($"ID {search} not found.");
 						return null;
@@ -341,7 +342,7 @@ namespace CodeAnimator
 				}	
 				case TextSearchType.HTMLClass:
 				{
-					if (!classSpans.TryGetValue(search, out result))
+					if (!_htmlClassSpans.TryGetValue(search, out result))
 					{
 						Debug.LogWarning($"Class {selector.searchText} not found.");
 						return null;
@@ -349,13 +350,13 @@ namespace CodeAnimator
 					break;
 				}
 				case TextSearchType.FirstTextMatch:
-					result = TextUtility.GetFirstSubSequence(renderers, search.ToCharArray());
+					result = TextUtility.GetFirstSubSequence(_renderers, search.ToCharArray());
 					break;
 				case TextSearchType.LastTextMatch:
-					result = TextUtility.GetLastSubSequence(renderers, search.ToCharArray());
+					result = TextUtility.GetLastSubSequence(_renderers, search.ToCharArray());
 					break;
 				case TextSearchType.AllTextMatches:
-					var allSpans = TextUtility.GetAllSubSequence(renderers, search.ToCharArray());
+					var allSpans = TextUtility.GetAllSubSequence(_renderers, search.ToCharArray());
 					Span resultSpan = new Span();
 					foreach (var span in allSpans)
 					{
@@ -369,7 +370,7 @@ namespace CodeAnimator
 					return null;
 			}
 			
-			SpanCache.Add(selector,result);
+			_spanCache.Add(selector,result);
 			return result;
 		}
 	}
