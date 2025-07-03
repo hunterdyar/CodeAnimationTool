@@ -22,7 +22,14 @@ public class AtomRenderer : MonoBehaviour
     {
         if (textRenderer.Font.TryGetSprite(atom,  out Sprite sprite))
         {
-            _spriteRenderer.sprite = sprite;
+            if (sprite != null)
+            {
+                _spriteRenderer.sprite = sprite;
+            }
+            else
+            {
+                //spaces, non-visible chars. null is fine for now.  w
+            }
         }
     }
     

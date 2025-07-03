@@ -45,18 +45,15 @@ namespace CodeAnimator
 				return;
 			}
 			
+			//replace with spaces.
 			if (character == '\t')
 			{
-				this.X += this.SpacesForTabs;
-				return;
+				for (int i = 0; i < this.SpacesForTabs; i++)
+				{
+					AddCharacter(' ');
+				}
 			}
-
-			if (character == ' ')
-			{
-				this.X += 1;
-				return;
-			}
-
+			
 			if (character == '\n')
 			{
 				this.LineBreak();
