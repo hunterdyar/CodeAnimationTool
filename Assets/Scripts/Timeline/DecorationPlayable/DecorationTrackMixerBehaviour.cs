@@ -30,6 +30,7 @@ namespace CodeAnimator
             Color blendedUnderline = Color.clear;
             float underlineAlpha = 0;
             Color blendedOutline = Color.clear;
+            float blendedOutlineWeight = 0;
             float outlineAlpha = 0;
             float outlineThickness = 0;
             bool highlight = false;
@@ -64,7 +65,8 @@ namespace CodeAnimator
                     outline = true;
                     outlineAlpha += input.Decoration.OutlineColor.a * inputWeight;
                     blendedOutline += input.Decoration.OutlineColor * inputWeight;
-                    outlineThickness += input.Decoration.OutlineThickness*inputWeight;
+                    outlineThickness += input.Decoration.OutlineThickness * inputWeight;
+                    blendedOutlineWeight += inputWeight;
                 }
                 
                 totalWeight += inputWeight;
@@ -73,17 +75,22 @@ namespace CodeAnimator
             if (totalWeight > 0)
             {
                 //when mixing half of one color, we want it's full color (/= totalweight to normalize), 
-                //and the "remaining" percentage is transparency.
-                
+                //and the "remaining" percentage non-normalized still is transparency.
+
                 blendedHighlight /= totalWeight;
                 blendedHighlight = blendedHighlight.WithAlpha(highlightAlpha);
-                
+
                 blendedUnderline /= totalWeight;
                 blendedUnderline = blendedUnderline.WithAlpha(underlineAlpha);
-
-                blendedOutline /= totalWeight;
-                blendedOutline = blendedOutline.WithAlpha(outlineAlpha);
             }
+
+            if (blendedOutlineWeight > 0)
+            {
+                blendedOutline /= blendedOutlineWeight;
+                blendedOutline = blendedOutline.WithAlpha(outlineAlpha);
+                outlineThickness /= blendedOutlineWeight;
+            }
+
             // blend to the default values
             var decoration = new Decoration()
             {

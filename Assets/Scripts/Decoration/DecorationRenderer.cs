@@ -97,16 +97,19 @@ namespace CodeAnimator
 			if (decoration.Outline)
 			{
 				LazyInitOutline();
-				_outlineRenderer.SetActive(true);
+				//this is cheap we can just set some variables.
+
 				if (currentDecoration == null || !currentDecoration.Value.Outline)
 				{
 					//we now have an underline.
 					_outlineRenderer.SetFromSpan(decorationSpan);
+					_outlineRenderer.SetActive(true);
 					_outlineRenderer.SetLineStyle(decoration.OutlineColor, decoration.OutlineThickness);
 				}
 				else
 				{
 					//the box already exists for this span.
+					_outlineRenderer.SetActive(true);
 					if (currentDecoration.Value.OutlineColor != decoration.OutlineColor || !Mathf.Approximately(currentDecoration.Value.OutlineThickness, decoration.OutlineThickness))
 					{
 						_outlineRenderer.SetLineStyle(decoration.OutlineColor, decoration.OutlineThickness);

@@ -8,7 +8,8 @@ namespace CodeAnimator
 	{
 		public bool Equals(Decoration other)
 		{
-			return Underline == other.Underline && UnderlineColor.Equals(other.UnderlineColor) && Highlight == other.Highlight && HighlightColor.Equals(other.HighlightColor) && Outline == other.Outline && OutlineThickness.Equals(other.OutlineThickness);
+			return Underline == other.Underline && UnderlineColor.Equals(other.UnderlineColor) && Highlight == other.Highlight && HighlightColor.Equals(other.HighlightColor) && Outline == other.Outline && OutlineThickness.Equals(other.OutlineThickness) &&
+			       OutlineColor.Equals(other.OutlineColor);
 		}
 
 		public override bool Equals(object obj)
