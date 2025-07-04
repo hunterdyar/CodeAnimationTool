@@ -14,7 +14,11 @@ namespace CodeAnimator
     {
         [Tooltip("The color of the text")]
         public TextStyle Style;
-        
+
+        public TextPlayableBehaviour()
+        {
+            Style = TextStyle.GetDefaultStyle();
+        }
         public string DisplayName()
         {
             var namePieces = "";

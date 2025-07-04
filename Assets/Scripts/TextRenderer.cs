@@ -379,6 +379,10 @@ namespace CodeAnimator
 
 		public Span GetSpan(SpanSelector selector)
 		{
+			if (selector == null)
+			{
+				return new Span();
+			}
 			if (_spanCache.TryGetValue(selector, out var cachedSpan))
 			{
 				return cachedSpan;
@@ -421,6 +425,32 @@ namespace CodeAnimator
 
 					result = resultSpan;
 					break;
+				case TextSearchType.Line:
+					if (_lineSpans == null)
+					{
+						return new Span();
+					}
+					if (selector.searchNumber >= 0 && selector.searchNumber < _lineSpans.Count)
+					{
+						return _lineSpans[selector.searchNumber];
+					}
+					else
+					{
+						return new Span();
+					}
+				case TextSearchType.Column:
+					if (_columnSpans == null)
+					{
+						return new Span();
+					}
+					if (selector.searchNumber >= 0 && selector.searchNumber < _columnSpans.Count)
+					{
+						return _columnSpans[selector.searchNumber];
+					}
+					else
+					{
+						return new Span();
+					}
 				default:
 					Debug.LogError("Bad selector!");
 					return null;
@@ -433,6 +463,29 @@ namespace CodeAnimator
 		public Vector3 GetLetterPosition(int c, int r)
 		{
 			//get the width by walking along and adding up all the display percentages.
+
+			float hPosition = 0f;
+			for (int j = 0; j < r; j++)
+			{
+				//tallest character on any line. Lower lines won't shrink until all characters shrink.
+				
+				//creating the first character on a line, etc.
+				if (j >= _lineSpans.Count)
+				{
+					hPosition += 1;
+					continue;
+				}
+
+				//Max breaks on empty sets. which i guess makes sense.
+				if (_lineSpans[j].Atoms.Any())
+				{
+					hPosition += _lineSpans[j].Atoms.Max(x => x.renderHeightPercentage);
+					continue;
+				}
+				
+				//default line sizes are 1... by definition. Aspect is width against height where height is 1.
+				hPosition += 1;
+			}
 			
 			float wPosition = 0;
 			for (int i = 0; i < c; i++)
@@ -449,7 +502,7 @@ namespace CodeAnimator
 			}
 			
 			_maxRowWidth = Mathf.Max(wPosition, _maxRowWidth);
-			return new Vector3(wPosition, -r, 0);
+			return new Vector3(wPosition, -hPosition, 0);
 		}
 
 		//todo: align left, right, etc.

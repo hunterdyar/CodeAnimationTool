@@ -24,6 +24,7 @@ namespace CodeAnimator
             Color blendedColor = Color.clear;
             float blendedAlpha = 0f;
             float blendedWidth = 0f;
+            float blendedHeight = 0;
             
             float totalWeight = 0f;
             float totalColorWeight = 0f;
@@ -47,6 +48,7 @@ namespace CodeAnimator
                 }
                 blendedAlpha += input.Style.Alpha * inputWeight;
                 blendedWidth += input.Style.RenderWidth * inputWeight;
+                blendedHeight += input.Style.RenderHeight * inputWeight;
                 totalWeight += inputWeight;
                 if (input.Style.shrinkWithWidth && input.Style.RenderWidth != 1 && inputWeight > 0)
                 {
@@ -57,8 +59,9 @@ namespace CodeAnimator
             float percentageDefault = 1 - totalWeight;
             float a = totalWeight > 0 ? blendedAlpha / totalWeight : 0f;
             float w = totalWeight > 0 ? blendedWidth / totalWeight : 1f;
+            float h =  totalWeight > 0 ? blendedHeight / totalWeight : 1f;
             // blend to the default values
-            var style = new TextStyle(blendedColor, a, w, setColor, shrink);
+            var style = new TextStyle(blendedColor, a, w, h, setColor, shrink);
            var span = trackBinding.GetSpan(Selector);
            if (span != null)
            {

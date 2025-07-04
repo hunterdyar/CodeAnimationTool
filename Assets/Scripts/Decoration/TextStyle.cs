@@ -18,13 +18,16 @@ namespace CodeAnimator
 		public float Alpha;
 
 		[Min(0)] public float RenderWidth;
+		[Min(0)] public float RenderHeight;
+
 		public bool shrinkWithWidth;
-		public TextStyle(Color color, float alpha = 1, float width = 1f, bool setColor = true, bool shrinkWithWidth = true)
+		public TextStyle(Color color, float alpha = 1, float width = 1f, float height = 1f, bool setColor = true, bool shrinkWithWidth = true)
 		{
 			this.SetColor = setColor;
 			this.Color = color;
 			this.Alpha = alpha;
 			this.RenderWidth = width;
+			this.RenderHeight = height;
 			this.shrinkWithWidth = shrinkWithWidth;
 		}
 
@@ -34,12 +37,13 @@ namespace CodeAnimator
 			this.Color = color;
 			this.Alpha = 1.0f;
 			this.RenderWidth = 1f;
+			this.RenderHeight = 1f;
 			this.shrinkWithWidth = true;
 		}
 
 		public Color GetColorWithAlpha()
 		{
-			if (Color.a != Alpha)
+			if (!Mathf.Approximately(Color.a, Alpha))
 			{
 				return new  Color(Color.r, Color.g, Color.b, Alpha);
 			}
@@ -54,8 +58,22 @@ namespace CodeAnimator
 			Color col = Color.Lerp(a.Color, b.Color, t);
 			float alpha = Mathf.Lerp(a.Alpha, b.Alpha, t);
 			float width = Mathf.Lerp(a.RenderWidth, b.RenderWidth, t);
+			float height = Mathf.Lerp(a.RenderHeight, b.RenderHeight, t);
 			//todo;fix bools
-			return new TextStyle(col, alpha, width);
+			return new TextStyle(col, alpha, width, height);
+		}
+
+		public static TextStyle GetDefaultStyle()
+		{
+			return new TextStyle()
+			{
+				SetColor = false,
+				Color = Color.black,
+				Alpha = 1.0f,
+				RenderWidth = 1.0f,
+				RenderHeight = 1.0f,
+				shrinkWithWidth = false
+			};
 		}
 	}
 }

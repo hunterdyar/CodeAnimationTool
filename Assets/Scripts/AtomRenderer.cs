@@ -13,6 +13,7 @@ public class AtomRenderer : MonoBehaviour
     private TextRenderer textRenderer;
     private SpriteRenderer _spriteRenderer;
 
+    public float renderHeightPercentage = 1;
     public float renderWidthPercentage = 1;
     private TextStyle DefaultStyle;
     private float PercentDefault = 1;
@@ -97,12 +98,16 @@ public class AtomRenderer : MonoBehaviour
             if (!Mathf.Approximately(s.RenderWidth, renderWidthPercentage))
             {
                 textRenderer.SetLayoutDirty();
+            }else if (!Mathf.Approximately(s.RenderHeight, renderHeightPercentage))
+            {
+                textRenderer.SetLayoutDirty();
             }
             
             renderWidthPercentage = s.RenderWidth;
+            renderHeightPercentage = s.RenderHeight;
             if (style.shrinkWithWidth)
             {
-                transform.localScale = new Vector3(s.RenderWidth, transform.localScale.y, transform.localScale.z);
+                transform.localScale = new Vector3(s.RenderWidth, s.RenderHeight, transform.localScale.z);
             }
 
             return;
@@ -113,9 +118,10 @@ public class AtomRenderer : MonoBehaviour
             textRenderer.SetLayoutDirty();
         }
         renderWidthPercentage = style.RenderWidth;
+        renderHeightPercentage = style.RenderHeight;
         if (style.shrinkWithWidth)
         {
-            transform.localScale = new Vector3(style.RenderWidth, transform.localScale.y, transform.localScale.z);
+            transform.localScale = new Vector3(style.RenderWidth, style.RenderHeight, transform.localScale.z);
         }
         _spriteRenderer.color = style.GetColorWithAlpha();
         
@@ -125,9 +131,10 @@ public class AtomRenderer : MonoBehaviour
     {
         var p = textRenderer.GetLetterPosition(this.col, this.row);
         
-        yield return new Vector3(p.x-renderWidthPercentage/2, p.y-0.5f, p.z);
-        yield return new Vector3(p.x+renderWidthPercentage/2, p.y-0.5f, p.z);
-        yield return new Vector3(p.x-renderWidthPercentage/2, p.y+.5f, p.z);
-        yield return new Vector3(p.x+renderWidthPercentage/2, p.y+.5f, p.z);
+        //uh the compiler will probably optimize these for me right?
+        yield return new Vector3(p.x-renderWidthPercentage/2, p.y- renderHeightPercentage / 2, p.z);
+        yield return new Vector3(p.x+renderWidthPercentage/2, p.y- renderHeightPercentage / 2, p.z);
+        yield return new Vector3(p.x-renderWidthPercentage/2, p.y+ renderHeightPercentage / 2, p.z);
+        yield return new Vector3(p.x+renderWidthPercentage/2, p.y+ renderHeightPercentage / 2, p.z);
     }
 }
