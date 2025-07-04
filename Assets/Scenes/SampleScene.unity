@@ -376,6 +376,10 @@ PlayableDirector:
     value: {fileID: 2066319232}
   - key: {fileID: 6370957234365708072, guid: fc6e6031e4393b945b2200dba34ad02b, type: 2}
     value: {fileID: 2066319232}
+  - key: {fileID: 1045941602151479686, guid: fc6e6031e4393b945b2200dba34ad02b, type: 2}
+    value: {fileID: 2066319232}
+  - key: {fileID: -5457208314965927585, guid: fc6e6031e4393b945b2200dba34ad02b, type: 2}
+    value: {fileID: 2066319232}
   m_ExposedReferences:
     m_References:
     - be3b29ce370b20748a462acb9e6beb94: {fileID: 2066319232}
@@ -424,9 +428,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   font: {fileID: 11400000, guid: 41fed179c11c1304d98a78f3fcf83136, type: 2}
-  inputText: "for (int i = 0; i < inputCount; i++)\n{\n\t//some code\n}"
+  inputText: "for (int i = 0; i < inputCount; i++)\n{\n\t//some code here.\n}"
   highlightAsLanguage: 1
-  HighlightLanguage: 
+  HighlightLanguage: C#
   CenterOnStart: 1
   ScaleToScreen: 0.9
 --- !u!4 &2066319233
@@ -438,9 +442,9 @@ Transform:
   m_GameObject: {fileID: 2066319231}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.54, y: 2.51, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -5.7, y: 1.75, z: 0}
+  m_LocalScale: {x: 0.26664466, y: 0.26664466, z: 0.26664466}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

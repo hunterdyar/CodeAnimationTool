@@ -8,7 +8,9 @@ using UnityEditor.Searcher;
 
 namespace CodeAnimator
 {
-	//Superclass that we actually interface with.
+	/// <summary>
+	/// The main text rendering component. This is the actual thing that lives in the scene and you use.
+	/// </summary>
 	public class TextRenderer : MonoBehaviour
 	{
 		public Font Font => font;
@@ -44,9 +46,22 @@ namespace CodeAnimator
 
 			if (CenterOnStart)
 			{
-				//center
+				Center();
+			}
+		}
+
+		[ContextMenu("Center")]
+		public void Center()
+		{
+			//center
+			if (Camera.main != null)
+			{
 				var r = Utility.GetScreenRect(Camera.main, 10);
 				SetAndScaleSelfIntoWorldRect(r, ScaleToScreen);
+			}
+			else
+			{
+				Debug.LogWarning("Camera main object not set");
 			}
 		}
 
@@ -318,11 +333,34 @@ namespace CodeAnimator
 			return s;
 		}
 		
+		[ContextMenu("Clear")]
 		private void Clear()
 		{
+			foreach (Transform child in transform)
+			{
+				if (Application.isPlaying)
+				{
+					Destroy(child.gameObject);
+				}
+				else
+				{
+					DestroyImmediate(child.gameObject);
+				}
+			}
 			foreach (var atom in _startingPosRenderers.Values)
 			{
-				Destroy(atom.gameObject);
+				if (atom == null)
+				{
+					continue;
+				}
+				if (Application.isPlaying)
+				{
+					Destroy(atom.gameObject);
+				}
+				else
+				{
+					DestroyImmediate(atom.gameObject);
+				}
 			}
 			
 			_lineSpans  = new List<Span>();
@@ -333,6 +371,13 @@ namespace CodeAnimator
 			_renderers.Clear();
 			_spanCache.Clear();
 			_startingPosRenderers.Clear();
+
+			//fix for weird (cache/nonimmedieate?) bug?
+			if (!Application.isPlaying && transform.childCount > 0)
+			{
+				//uh?????
+				Clear();
+			}
 		}
 
 		private static void SetDefaultStyle(Span span, TextStyle style)
@@ -535,5 +580,12 @@ namespace CodeAnimator
 		{
 			_isLayoutDirty = true;
 		}
+
+		private void OnValidate()
+		{
+			
+			//_spanCache.Clear();
+		}
+		
 	}
 }

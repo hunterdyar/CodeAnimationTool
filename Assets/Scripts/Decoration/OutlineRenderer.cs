@@ -44,7 +44,6 @@ namespace CodeAnimator
 			_points.Clear();
 			foreach (AtomRenderer atom in span.Atoms)
 			{
-				int lastIndex = 0;
 				foreach (var p in atom.GetCorners())
 				{
 					_points.Add(p);
