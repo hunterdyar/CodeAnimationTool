@@ -1,7 +1,7 @@
 
 ![Animated clip of a for loop expanding and highlighting.](./~Documentation/example2.gif)
 
-# Code Anmiator
+# Code Animator
 A tool for creating video clips of text with animated decorations. *Define the text as text while declaring animations on a timeline.*
 
 Designed to be used in the Unity Editor, using the Recoder package to output video files, and the Timeline package to configure teh animation.
